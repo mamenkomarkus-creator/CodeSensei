@@ -1,10 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Копіюємо весь репозиторій
 COPY . .
 
-# Робимо restore та publish прямо для WebApi
 RUN dotnet restore src/WebApi/WebApi.csproj
 RUN dotnet publish src/WebApi/WebApi.csproj -c Release -o /app/publish
 
