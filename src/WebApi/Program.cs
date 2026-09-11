@@ -1,10 +1,23 @@
 using Application.Common.Interfaces;
 using Application.Common.Models;
+using Application.Interfaces;
 using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Реєструємо сервіси
 builder.Services.AddSingleton<ITicketStore, TicketStore>();
+
+// Реєструємо HttpClient та GeminiLlmService для роботи з AI
+builder.Services.AddHttpClient<ILlmService, GeminiLlmService>();
+builder.Services.AddSingleton<ILlmService>(sp =>
+{
+    var httpClient = sp.GetRequiredService<HttpClient>();
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    // Ключ береться з конфігурації (або змінних середовища на Render)
+    var apiKey = configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? "default_key";
+    return new GeminiLlmService(httpClient, apiKey);
+});
 
 var app = builder.Build();
 
@@ -61,7 +74,29 @@ app.MapGet("/api/inbox", (string? k, ITicketStore store) =>
     });
 });
 
-// 5. Веб-інтерфейс /paste
+// 5. Новий ендпоінт: Прямий запит на аналіз коду через Gemini AI
+app.MapPost("/api/ai/analyze", async (SubmitCodeRequest req, string? k, ILlmService llmService) =>
+{
+    if (k != validToken) return Results.Unauthorized();
+    if (string.IsNullOrWhiteSpace(req.Code))
+    {
+        return Results.BadRequest(new { ok = false, error = "Code cannot be empty" });
+    }
+
+    try
+    {
+        string prompt = $"Проаналізуй цей код ({req.Language ?? "csharp"}) з точки зору об'єктно-орієнтованого програмування, вкажи на помилки та дай коротку пораду українською:\n\n{req.Code}";
+        var aiResponse = await llmService.GenerateResponseAsync(prompt);
+        
+        return Results.Ok(new { ok = true, analysis = aiResponse });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { ok = false, error = ex.Message });
+    }
+});
+
+// 6. Веб-інтерфейс /paste (залишається без змін)
 app.MapGet("/paste", () => Results.Content("""
 <!DOCTYPE html>
 <html lang="uk">
