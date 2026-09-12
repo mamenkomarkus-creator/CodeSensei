@@ -1,177 +1,98 @@
-using Application.Common.Interfaces;
-using Application.Common.Models;
 using Application.Interfaces;
 using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Реєструємо сервіси
-builder.Services.AddSingleton<ITicketStore, TicketStore>();
+string geminiApiKey = builder.Configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey") ?? string.Empty;
 
-// Реєструємо HttpClient та GeminiLlmService для роботи з AI
-builder.Services.AddHttpClient<ILlmService, GeminiLlmService>();
-builder.Services.AddSingleton<ILlmService>(sp =>
-{
-    var httpClient = sp.GetRequiredService<HttpClient>();
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    // Ключ береться з конфігурації (або змінних середовища на Render)
-    var apiKey = configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? "default_key";
-    return new GeminiLlmService(httpClient, apiKey);
-});
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ILlmService>(provider => 
+    new GeminiLlmService(provider.GetRequiredService<IHttpClientFactory>().CreateClient(), geminiApiKey));
+
+builder.Services.AddSingleton<TicketStore>();
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-const string validToken = "secret123";
+app.UseHttpsRedirection();
 
-// 1. Root перевірка працездатності
+app.UseAuthorization();
+
+app.MapControllers();
+
 app.MapGet("/", () => Results.Ok(new { status = "running", project = "CodeSensei" }));
 
-// 2. Ендпоінт пресетів для VRChat (1..24)
-app.MapGet("/api/preset/{id:int}", (int id, string? k, ITicketStore store) =>
+app.MapGet("/paste", async context =>
 {
-    if (k != validToken) return Results.Unauthorized();
-
-    var preset = store.GetPreset(id);
-    return Results.Ok(new
-    {
-        ok = true,
-        status = "explained",
-        lines = preset
-    });
-});
-
-// 3. Відправка довільного коду через веб
-app.MapPost("/api/code/submit", (SubmitCodeRequest req, ITicketStore store) =>
-{
-    if (string.IsNullOrWhiteSpace(req.Code))
-    {
-        return Results.BadRequest(new { ok = false, error = "Code cannot be empty" });
-    }
-
-    var ticket = store.CreateTicket(req.Code, req.Language ?? "csharp");
-    return Results.Ok(new { ok = true, ticketId = ticket.Id });
-});
-
-// 4. Опитування черги з VRChat
-app.MapGet("/api/inbox", (string? k, ITicketStore store) =>
-{
-    if (k != validToken) return Results.Unauthorized();
-
-    var next = store.DequeueNext();
-    if (next is null)
-    {
-        return Results.Ok(new { ok = true, hasNew = false });
-    }
-
-    return Results.Ok(new
-    {
-        ok = true,
-        hasNew = true,
-        ticketId = next.Id,
-        language = next.Language,
-        status = next.Status,
-        lines = next.Lines
-    });
-});
-
-// 5. Новий ендпоінт: Прямий запит на аналіз коду через Gemini AI
-app.MapPost("/api/ai/analyze", async (SubmitCodeRequest req, string? k, ILlmService llmService) =>
-{
-    if (k != validToken) return Results.Unauthorized();
-    if (string.IsNullOrWhiteSpace(req.Code))
-    {
-        return Results.BadRequest(new { ok = false, error = "Code cannot be empty" });
-    }
-
-    try
-    {
-        string prompt = $"Проаналізуй цей код ({req.Language ?? "csharp"}) з точки зору об'єктно-орієнтованого програмування, вкажи на помилки та дай коротку пораду українською:\n\n{req.Code}";
-        var aiResponse = await llmService.GenerateResponseAsync(prompt);
-        
-        return Results.Ok(new { ok = true, analysis = aiResponse });
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { ok = false, error = ex.Message });
-    }
-});
-
-// 6. Веб-інтерфейс /paste (залишається без змін)
-app.MapGet("/paste", () => Results.Content("""
+    context.Response.ContentType = "text/html; charset=utf-8";
+    await context.Response.WriteAsync(@"
 <!DOCTYPE html>
-<html lang="uk">
+<html lang='uk'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeSensei - Відправка коду</title>
+    <meta charset='UTF-8'>
+    <title>CodeSensei - Paste Code</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121214; color: #e1e1e6; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; }
-        .box { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 14px; }
-        h1 { margin: 0 0 8px 0; font-size: 24px; color: #00e676; }
-        textarea { width: 100%; height: 260px; background: #202024; border: 1px solid #323238; border-radius: 8px; color: #fff; font-family: monospace; font-size: 14px; padding: 12px; box-sizing: border-box; resize: vertical; }
-        select, button { padding: 10px 14px; border-radius: 6px; border: 1px solid #323238; background: #29292e; color: #fff; font-size: 14px; cursor: pointer; }
-        button { background: #00e676; color: #121214; font-weight: bold; border: none; }
-        button:hover { background: #00c853; }
-        #status { padding: 10px; border-radius: 6px; display: none; font-size: 14px; }
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 450px; }
+        h2 { margin-top: 0; color: #38bdf8; }
+        label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        textarea, select { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; box-sizing: border-box; }
+        textarea { height: 150px; resize: vertical; font-family: monospace; }
+        button { margin-top: 1.5rem; width: 100%; padding: 0.75rem; border: none; border-radius: 6px; background: #0284c7; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #0ea5e9; }
+        #response { margin-top: 1.0rem; font-size: 0.9rem; white-space: pre-wrap; background: #0f172a; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; display: none; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>CodeSensei Live Paste</h1>
-        <select id="lang">
-            <option value="csharp">C#</option>
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
+    <div class='card'>
+        <h2>CodeSensei AI Terminal</h2>
+        <label for='language'>Мова програмування:</label>
+        <select id='language'>
+            <option value='csharp'>C#</option>
+            <option value='python'>Python</option>
+            <option value='javascript'>JavaScript</option>
         </select>
-        <textarea id="code" placeholder="// Вставте код для перевірки..."></textarea>
-        <button id="sendBtn" onclick="submitCode()">Відправити у VRChat</button>
-        <div id="status"></div>
+        
+        <label for='code'>Фрагмент коду:</label>
+        <textarea id='code' placeholder='Встав свій код сюди...'></textarea>
+        
+        <button onclick='sendCode()'>Надіслати на аналіз</button>
+        <div id='response'></div>
     </div>
 
     <script>
-        async function submitCode() {
+        async function sendCode() {
             const code = document.getElementById('code').value;
-            const language = document.getElementById('lang').value;
-            const status = document.getElementById('status');
-            const btn = document.getElementById('sendBtn');
-
+            const language = document.getElementById('language').value;
+            const responseDiv = document.getElementById('response');
+            
             if (!code.trim()) {
-                alert('Введіть код перед відправкою!');
+                alert('Будь ласка, введіть код');
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerText = 'Відправка...';
+            responseDiv.style.display = 'block';
+            responseDiv.innerText = 'Аналізується через Gemini AI...';
 
             try {
-                const res = await fetch('/api/code/submit', {
+                const res = await fetch('/api/ai/analyze?k=secret123', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code, language })
                 });
+                
                 const data = await res.json();
-                if (data.ok) {
-                    status.style.display = 'block';
-                    status.style.background = '#1b3a24';
-                    status.style.color = '#4ade80';
-                    status.innerText = 'Код додано в чергу! ID: ' + data.ticketId;
-                    document.getElementById('code').value = '';
-                } else {
-                    throw new Error(data.error || 'Помилка');
-                }
+                responseDiv.innerText = JSON.stringify(data, null, 2);
             } catch (err) {
-                status.style.display = 'block';
-                status.style.background = '#3a1b1b';
-                status.style.color = '#f87171';
-                status.innerText = 'Помилка відправки: ' + err.message;
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Відправити у VRChat';
+                responseDiv.innerText = 'Помилка запиту: ' + err.message;
             }
         }
     </script>
 </body>
 </html>
-""", "text/html; charset=utf-8"));
+    ");
+});
 
 app.Run();
