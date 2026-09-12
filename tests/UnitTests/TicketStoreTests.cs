@@ -1,112 +1,151 @@
+using System;
+using System.Threading.Tasks;
+using Application.Interfaces;
+using Application.Utils;
 using Infrastructure.Services;
 using NUnit.Framework;
 
 namespace UnitTests;
 
+public class MockLlmService : ILlmService
+{
+    public Task<string> GenerateResponseAsync(string prompt) 
+        => Task.FromResult("```csharp\nConsole.WriteLine(\"Done\");\n```\nАналіз успішно завершено.");
+
+    public Task<string> GenerateResponseAsync(string prompt, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ErrorMockLlmService : ILlmService
+{
+    public Task<string> GenerateResponseAsync(string prompt) 
+        => throw new Exception("Штучний інтелект тимчасово недоступний");
+
+    public Task<string> GenerateResponseAsync(string prompt, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 [TestFixture]
 public class TicketStoreTests
 {
-    private TicketStore _store = null!;
+    private TicketStore _ticketStore;
 
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
-        _store = new TicketStore();
+        _ticketStore = new TicketStore(new MockLlmService());
     }
 
     [Test]
-    public void CreateTicket_ShouldStoreAndEnqueueTicket()
+    public void CreateTicket_EmptyCode_ThrowsArgumentException()
     {
-        // Arrange
-        const string code = "int x = 42;";
-        const string lang = "csharp";
+        string emptyCode = "   ";
 
-        // Act
-        var ticket = _store.CreateTicket(code, lang);
-
-        // Assert
-        Assert.That(ticket, Is.Not.Null);
-        Assert.That(ticket.Id, Has.Length.EqualTo(8));
-        Assert.That(ticket.Code, Is.EqualTo(code));
-        Assert.That(ticket.Language, Is.EqualTo(lang));
-        Assert.That(ticket.Status, Is.EqualTo("explained"));
-        Assert.That(ticket.Lines, Is.Not.Empty);
-
-        var dequeued = _store.DequeueNext();
-        Assert.That(dequeued, Is.Not.Null);
-        Assert.That(dequeued!.Id, Is.EqualTo(ticket.Id));
+        var ex = Assert.Throws<ArgumentException>(() => _ticketStore.CreateTicket(emptyCode, "csharp"));
+        Assert.That(ex.Message, Does.Contain("не може бути порожнім"));
     }
 
     [Test]
-    public void DequeueNext_WhenQueueIsEmpty_ShouldReturnNull()
+    public void CreateTicket_CodeExceedsLimit_ThrowsArgumentException()
     {
-        // Act
-        var result = _store.DequeueNext();
+        string longCode = new string('A', 3001);
 
-        // Assert
-        Assert.That(result, Is.Null);
+        var ex = Assert.Throws<ArgumentException>(() => _ticketStore.CreateTicket(longCode, "csharp"));
+        Assert.That(ex.Message, Does.Contain("перевищує ліміт"));
     }
 
     [Test]
-    public void DequeueNext_ShouldRespectFifoOrder()
+    public void GetTicket_InvalidId_ReturnsNull()
     {
-        // Arrange
-        var t1 = _store.CreateTicket("var a = 1;", "csharp");
-        var t2 = _store.CreateTicket("var b = 2;", "csharp");
+        var ticket = _ticketStore.GetTicket("non-existent-guid");
 
-        // Act & Assert
-        Assert.That(_store.DequeueNext()?.Id, Is.EqualTo(t1.Id));
-        Assert.That(_store.DequeueNext()?.Id, Is.EqualTo(t2.Id));
-        Assert.That(_store.DequeueNext(), Is.Null);
-    }
-
-    [TestCase(1, "Інкапсуляція")]
-    [TestCase(2, "Наслідування")]
-    [TestCase(3, "Поліморфізм")]
-    [TestCase(4, "Абстракція")]
-    [TestCase(5, "Клас vs Об'єкт")]
-    [TestCase(16, "SOLID")]
-    [TestCase(24, "ООП vs Процедурне")]
-    public void GetPreset_ValidId_ShouldReturnMeaningfulLines(int presetId, string expectedKeyword)
-    {
-        // Act
-        var lines = _store.GetPreset(presetId);
-
-        // Assert
-        Assert.That(lines, Is.Not.Null);
-        Assert.That(lines.Count, Is.GreaterThanOrEqualTo(3));
-        Assert.That(string.Join(" ", lines), Does.Contain(expectedKeyword));
+        Assert.That(ticket, Is.Null);
     }
 
     [Test]
-    public void GetPreset_All24Presets_ShouldNotReturnDefaultFallback()
+    public async Task ProcessTicket_Success_UpdatesStatusToCompletedAndFormatsResult()
     {
-        for (var i = 1; i <= 24; i++)
+        string validCode = "int a = 1;";
+        string ticketId = _ticketStore.CreateTicket(validCode, "csharp");
+
+        TicketItem? ticket = null;
+        for (int i = 0; i < 10; i++)
         {
-            var lines = _store.GetPreset(i);
-            var fullText = string.Join(" ", lines);
-
-            Assert.That(fullText, Does.Not.Contain("поки не задана"), $"Пресет #{i} повернув дефолтну заглушку замість опису.");
+            await Task.Delay(100);
+            ticket = _ticketStore.GetTicket(ticketId);
+            if (ticket?.Status == "Completed") break;
         }
+
+        Assert.That(ticket, Is.Not.Null);
+        Assert.That(ticket.Status, Is.EqualTo("Completed"));
+        Assert.That(ticket.Result, Does.Not.Contain("```csharp"));
+        Assert.That(ticket.Result, Does.Contain("Console.WriteLine(\"Done\");"));
     }
 
     [Test]
-    public void GetPreset_InvalidId_ShouldReturnFallbackMessage()
+    public async Task ProcessTicket_LlmThrowsException_UpdatesStatusToError()
     {
-        // Act
-        var lines = _store.GetPreset(999);
+        var errorStore = new TicketStore(new ErrorMockLlmService());
+        string ticketId = errorStore.CreateTicket("int b = 2;", "csharp");
 
-        // Assert
-        Assert.That(string.Join(" ", lines), Does.Contain("поки не задана"));
+        TicketItem? ticket = null;
+        for (int i = 0; i < 10; i++)
+        {
+            await Task.Delay(100);
+            ticket = errorStore.GetTicket(ticketId);
+            if (ticket?.Status == "Error") break;
+        }
+
+        Assert.That(ticket, Is.Not.Null);
+        Assert.That(ticket.Status, Is.EqualTo("Error"));
+        Assert.That(ticket.Result, Does.Contain("Штучний інтелект тимчасово недоступний"));
+    }
+}
+
+[TestFixture]
+public class TextFormatterTests
+{
+    [Test]
+    public void FormatForTerminal_NullOrWhiteSpace_ReturnsEmptyString()
+    {
+        string resultNull = TextFormatter.FormatForTerminal(null!);
+        string resultEmpty = TextFormatter.FormatForTerminal("   ");
+
+        Assert.That(resultNull, Is.Empty);
+        Assert.That(resultEmpty, Is.Empty);
     }
 
     [Test]
-    public void GenerateExplanation_DetectsGotoWarning()
+    public void FormatForTerminal_RemovesMarkdown_ReturnsCleanString()
     {
-        // Act
-        var ticket = _store.CreateTicket("start: goto start;", "csharp");
+        string input = "**Ось ваш код:**\n```csharp\nint x = 5;\n```";
 
-        // Assert
-        Assert.That(string.Join(" ", ticket.Lines), Does.Contain("goto"));
+        string result = TextFormatter.FormatForTerminal(input);
+
+        Assert.That(result, Does.Not.Contain("```csharp"));
+        Assert.That(result, Does.Not.Contain("```"));
+        Assert.That(result, Does.Not.Contain("**"));
+        Assert.That(result, Does.Contain("Ось ваш код:"));
+        Assert.That(result, Does.Contain("int x = 5;"));
+    }
+
+    [Test]
+    public void FormatForTerminal_LongLine_WrapsAtWordBoundary()
+    {
+        string input = "This is a very long string that should be wrapped by the formatter at word boundaries to fit the VR terminal.";
+        
+        string result = TextFormatter.FormatForTerminal(input, 55);
+
+        Assert.That(result, Does.Contain("\n"));
+        
+        string[] lines = result.Split('\n');
+        foreach (var line in lines)
+        {
+            Assert.That(line.Length, Is.LessThanOrEqualTo(55));
+        }
     }
 }

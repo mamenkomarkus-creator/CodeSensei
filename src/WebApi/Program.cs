@@ -1,7 +1,28 @@
+using System;
+using System.Net.Http;
+using System.Threading.RateLimiting;
 using Application.Interfaces;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 
 string geminiApiKey = builder.Configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey") ?? string.Empty;
 
@@ -13,13 +34,36 @@ builder.Services.AddSingleton<TicketStore>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseRateLimiter();
 
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        var token = context.Request.Query["k"].ToString();
+        string expectedToken = builder.Configuration["App:AccessToken"] ?? Environment.GetEnvironmentVariable("App__AccessToken") ?? "secret123";
+        
+        if (token != expectedToken)
+        {
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsync("{\"error\":\"Unauthorized: Invalid access token\"}");
+            return;
+        }
+    }
+    await next();
+});
+
+app.UseAuthorization();
 app.MapControllers();
 
 app.MapGet("/", () => Results.Ok(new { status = "running", project = "CodeSensei" }));
@@ -68,23 +112,29 @@ app.MapGet("/paste", async context =>
             const language = document.getElementById('language').value;
             const responseDiv = document.getElementById('response');
             
-            if (!code.trim()) {
-                alert('Будь ласка, введіть код');
-                return;
-            }
+            if (!code.trim()) { alert('Будь ласка, введіть код'); return; }
 
             responseDiv.style.display = 'block';
-            responseDiv.innerText = 'Аналізується через Gemini AI...';
+            responseDiv.innerText = 'Відправка запиту...';
 
             try {
-                const res = await fetch('/api/ai/analyze?k=secret123', {
+                const res = await fetch('/api/ask?k=secret123', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code, language })
                 });
                 
                 const data = await res.json();
-                responseDiv.innerText = JSON.stringify(data, null, 2);
+                if (data.error) { responseDiv.innerText = 'Помилка: ' + data.error; return; }
+                
+                responseDiv.innerText = 'Тікет створено. Аналізується через Gemini AI...';
+
+                setTimeout(async () => {
+                    const inboxRes = await fetch(`/api/inbox/${data.ticketId}?k=secret123`);
+                    const inboxData = await inboxRes.json();
+                    responseDiv.innerText = JSON.stringify(inboxData, null, 2);
+                }, 4000);
+
             } catch (err) {
                 responseDiv.innerText = 'Помилка запиту: ' + err.message;
             }
