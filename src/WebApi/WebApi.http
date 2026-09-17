@@ -1,6 +1,23 @@
 @WebApi_HostAddress = http://localhost:5001
+@token = secret123
 
-GET {{WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
+### Health
+GET {{WebApi_HostAddress}}/
 
-###
+### Paste page
+GET {{WebApi_HostAddress}}/paste
+
+### Ask
+POST {{WebApi_HostAddress}}/api/ask?k={{token}}
+Content-Type: application/json
+
+{
+  "code": "class Student { public string Name; }",
+  "language": "csharp"
+}
+
+### Inbox (replace ticket id)
+GET {{WebApi_HostAddress}}/api/inbox/TICKET_ID?k={{token}}
+
+### Preset
+GET {{WebApi_HostAddress}}/api/preset/1?k={{token}}

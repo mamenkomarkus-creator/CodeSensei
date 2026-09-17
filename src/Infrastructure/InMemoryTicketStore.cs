@@ -1,60 +1,72 @@
 using System.Collections.Concurrent;
-using System.Security.Cryptography;
 using Application;
 using Domain;
 
 namespace Infrastructure;
 
-public class InMemoryTicketStore : ITicketStore
+public sealed class InMemoryTicketStore : ITicketStore
 {
     private readonly ConcurrentDictionary<string, ReviewTicket> _tickets = new();
-    private static readonly TimeSpan DefaultTtl = TimeSpan.FromMinutes(15);
+    private readonly TimeSpan _ttl;
+    private readonly PeriodicTimer _timer;
+    private readonly CancellationTokenSource _cts = new();
 
-    public ReviewTicket CreateTicket(TimeSpan? ttl = null)
+    public InMemoryTicketStore(TimeSpan? ttl = null)
+    {
+        _ttl = ttl ?? TimeSpan.FromMinutes(15);
+        _timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+        _ = CleanupLoopAsync();
+    }
+
+    public ReviewTicket Create(string code, string language)
     {
         CleanupExpired();
-
-        var code = GenerateUniqueCode();
-        var ticket = new ReviewTicket(code, ttl ?? DefaultTtl);
-        _tickets[code] = ticket;
+        string id = Guid.NewGuid().ToString();
+        var ticket = new ReviewTicket(id, code, language, _ttl);
+        _tickets[id] = ticket;
         return ticket;
     }
 
-    public ReviewTicket? GetTicket(string code)
+    public ReviewTicket? Get(string ticketId)
     {
-        var normalizedCode = code.Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(ticketId))
+            return null;
 
-        if (!_tickets.TryGetValue(normalizedCode, out var ticket))
+        if (!_tickets.TryGetValue(ticketId, out ReviewTicket? ticket))
             return null;
 
         if (ticket.IsExpired)
         {
-            ticket.MarkExpired();
-            _tickets.TryRemove(normalizedCode, out _);
+            _tickets.TryRemove(ticketId, out _);
             return null;
         }
 
         return ticket;
     }
 
-    public bool TrySubmitCode(string code, string codeSnippet)
+    public void Complete(string ticketId, string formattedResult)
     {
-        var ticket = GetTicket(code);
-        if (ticket == null || ticket.Status != TicketStatus.Pending)
-            return false;
-
-        ticket.SubmitCode(codeSnippet);
-        return true;
+        ReviewTicket? ticket = Get(ticketId);
+        ticket?.Complete(formattedResult);
     }
 
-    public bool TryCompleteReview(string code, string reviewResult)
+    public void Fail(string ticketId, string errorMessage)
     {
-        var ticket = GetTicket(code);
-        if (ticket == null)
-            return false;
+        ReviewTicket? ticket = Get(ticketId);
+        ticket?.Fail(errorMessage);
+    }
 
-        ticket.CompleteReview(reviewResult);
-        return true;
+    private async Task CleanupLoopAsync()
+    {
+        try
+        {
+            while (await _timer.WaitForNextTickAsync(_cts.Token))
+                CleanupExpired();
+        }
+        catch (OperationCanceledException)
+        {
+            // host shutdown
+        }
     }
 
     private void CleanupExpired()
@@ -62,22 +74,7 @@ public class InMemoryTicketStore : ITicketStore
         foreach (var pair in _tickets)
         {
             if (pair.Value.IsExpired)
-            {
                 _tickets.TryRemove(pair.Key, out _);
-            }
         }
-    }
-
-    private string GenerateUniqueCode()
-    {
-        string code;
-        do
-        {
-            // Формат CS-XXXX (наприклад, CS-7492), зручно вводити у VRChat
-            var number = RandomNumberGenerator.GetInt32(1000, 9999);
-            code = $"CS-{number}";
-        } while (_tickets.ContainsKey(code));
-
-        return code;
     }
 }

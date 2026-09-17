@@ -4,8 +4,8 @@ namespace Application;
 
 public interface ITicketStore
 {
-    ReviewTicket CreateTicket(TimeSpan? ttl = null);
-    ReviewTicket? GetTicket(string code);
-    bool TrySubmitCode(string code, string codeSnippet);
-    bool TryCompleteReview(string code, string reviewResult);
+    ReviewTicket Create(string code, string language);
+    ReviewTicket? Get(string ticketId);
+    void Complete(string ticketId, string formattedResult);
+    void Fail(string ticketId, string errorMessage);
 }
