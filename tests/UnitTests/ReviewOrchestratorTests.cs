@@ -13,7 +13,7 @@ public class ReviewOrchestratorTests
     public async Task ProcessAsync_SuccessfulLlm_CompletesFormattedTicket()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
         ReviewTicket ticket = store.Create("int a = 1;", "csharp");
         var llm = new StubLlmClient(new LlmResult(true, "```csharp\nConsole.WriteLine(\"Done\");\n```"));
         var orchestrator = new ReviewOrchestrator(llm, store);
@@ -34,7 +34,7 @@ public class ReviewOrchestratorTests
     public async Task ProcessAsync_FailedLlm_MarksTicketError()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
         ReviewTicket ticket = store.Create("int b = 2;", "csharp");
         var llm = new StubLlmClient(new LlmResult(false, "Модель перевантажена (429). Зачекайте хвилину і спробуйте ще раз."));
         var orchestrator = new ReviewOrchestrator(llm, store);

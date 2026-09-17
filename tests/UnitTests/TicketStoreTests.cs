@@ -11,7 +11,7 @@ public class TicketStoreTests
     public void Create_ThenGet_ReturnsPendingTicket()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
 
         // Act
         ReviewTicket created = store.Create("int a = 1;", "csharp");
@@ -27,7 +27,7 @@ public class TicketStoreTests
     public void Get_UnknownId_ReturnsNull()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
 
         // Act
         ReviewTicket? ticket = store.Get("missing");
@@ -40,7 +40,7 @@ public class TicketStoreTests
     public async Task Get_ExpiredTicket_ReturnsNull()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMilliseconds(30));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMilliseconds(30));
         ReviewTicket created = store.Create("int a = 1;", "csharp");
         await Task.Delay(60);
 
@@ -55,7 +55,7 @@ public class TicketStoreTests
     public void Complete_UpdatesStatusAndResult()
     {
         // Arrange
-        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
         ReviewTicket created = store.Create("int a = 1;", "csharp");
 
         // Act
@@ -65,5 +65,31 @@ public class TicketStoreTests
         // Assert
         Assert.That(ticket!.Status, Is.EqualTo(TicketStatus.Completed));
         Assert.That(ticket.Result, Is.EqualTo("ok"));
+    }
+
+    [Test]
+    public void Complete_AfterTtl_StillRecordsResult()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMilliseconds(20));
+        ReviewTicket created = store.Create("int a = 1;", "csharp");
+        Thread.Sleep(40);
+
+        // Act
+        store.Complete(created.Id, "late");
+
+        // Assert
+        Assert.That(created.Status, Is.EqualTo(TicketStatus.Completed));
+        Assert.That(created.Result, Is.EqualTo("late"));
+    }
+
+    [Test]
+    public async Task Dispose_StopsCleanupLoop()
+    {
+        // Arrange
+        var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+
+        // Act / Assert
+        await store.DisposeAsync();
     }
 }

@@ -6,12 +6,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure;
 
-/// <summary>
-/// Єдина реалізація LLM-провайдера. Щоб змінити OpenAI / Groq / інший Google-модель,
-/// редагуйте лише цей файл — інтерфейс ILlmClient і решта шарів лишаються без змін.
-/// Поточний провайдер: Google AI Studio (Gemini), бо ключ оплачується в Studio
-/// і REST generateContent працює з .NET без SDK.
-/// </summary>
 public sealed class LlmClient : ILlmClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new()

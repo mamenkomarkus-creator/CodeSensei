@@ -4,18 +4,20 @@ using Domain;
 
 namespace Infrastructure;
 
-public sealed class InMemoryTicketStore : ITicketStore
+public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDisposable
 {
     private readonly ConcurrentDictionary<string, ReviewTicket> _tickets = new();
     private readonly TimeSpan _ttl;
     private readonly PeriodicTimer _timer;
     private readonly CancellationTokenSource _cts = new();
+    private readonly Task _cleanupTask;
+    private bool _disposed;
 
     public InMemoryTicketStore(TimeSpan? ttl = null)
     {
         _ttl = ttl ?? TimeSpan.FromMinutes(15);
         _timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
-        _ = CleanupLoopAsync();
+        _cleanupTask = CleanupLoopAsync();
     }
 
     public ReviewTicket Create(string code, string language)
@@ -29,10 +31,8 @@ public sealed class InMemoryTicketStore : ITicketStore
 
     public ReviewTicket? Get(string ticketId)
     {
-        if (string.IsNullOrWhiteSpace(ticketId))
-            return null;
-
-        if (!_tickets.TryGetValue(ticketId, out ReviewTicket? ticket))
+        ReviewTicket? ticket = Find(ticketId);
+        if (ticket is null)
             return null;
 
         if (ticket.IsExpired)
@@ -46,14 +46,48 @@ public sealed class InMemoryTicketStore : ITicketStore
 
     public void Complete(string ticketId, string formattedResult)
     {
-        ReviewTicket? ticket = Get(ticketId);
-        ticket?.Complete(formattedResult);
+        Find(ticketId)?.Complete(formattedResult);
     }
 
     public void Fail(string ticketId, string errorMessage)
     {
-        ReviewTicket? ticket = Get(ticketId);
-        ticket?.Fail(errorMessage);
+        Find(ticketId)?.Fail(errorMessage);
+    }
+
+    public void Dispose()
+    {
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
+        GC.SuppressFinalize(this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+        await _cts.CancelAsync();
+        _timer.Dispose();
+
+        try
+        {
+            await _cleanupTask;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+
+        _cts.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private ReviewTicket? Find(string ticketId)
+    {
+        if (string.IsNullOrWhiteSpace(ticketId))
+            return null;
+
+        _tickets.TryGetValue(ticketId, out ReviewTicket? ticket);
+        return ticket;
     }
 
     private async Task CleanupLoopAsync()
@@ -65,7 +99,11 @@ public sealed class InMemoryTicketStore : ITicketStore
         }
         catch (OperationCanceledException)
         {
-            // host shutdown
+            CleanupExpired();
+        }
+        catch (ObjectDisposedException)
+        {
+            CleanupExpired();
         }
     }
 
