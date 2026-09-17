@@ -20,11 +20,14 @@ public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDispo
         _cleanupTask = CleanupLoopAsync();
     }
 
-    public ReviewTicket Create(string code, string language)
+    public ReviewTicket Create(string sourceCode, string language, string? clientTicketCode = null)
     {
         CleanupExpired();
-        string id = Guid.NewGuid().ToString();
-        var ticket = new ReviewTicket(id, code, language, _ttl);
+        string id = NormalizeId(clientTicketCode);
+        if (id.Length == 0)
+            id = Guid.NewGuid().ToString("D").ToUpperInvariant();
+
+        var ticket = new ReviewTicket(id, sourceCode, language, _ttl);
         _tickets[id] = ticket;
         return ticket;
     }
@@ -37,11 +40,19 @@ public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDispo
 
         if (ticket.IsExpired)
         {
-            _tickets.TryRemove(ticketId, out _);
+            _tickets.TryRemove(ticket.Id, out _);
             return null;
         }
 
         return ticket;
+    }
+
+    public IReadOnlyList<ReviewTicket> ListReady()
+    {
+        CleanupExpired();
+        return _tickets.Values
+            .Where(t => !t.IsExpired && t.Status is TicketStatus.Completed or TicketStatus.Error)
+            .ToArray();
     }
 
     public void Complete(string ticketId, string formattedResult)
@@ -83,11 +94,20 @@ public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDispo
 
     private ReviewTicket? Find(string ticketId)
     {
-        if (string.IsNullOrWhiteSpace(ticketId))
+        string id = NormalizeId(ticketId);
+        if (id.Length == 0)
             return null;
 
-        _tickets.TryGetValue(ticketId, out ReviewTicket? ticket);
+        _tickets.TryGetValue(id, out ReviewTicket? ticket);
         return ticket;
+    }
+
+    private static string NormalizeId(string? ticketId)
+    {
+        if (string.IsNullOrWhiteSpace(ticketId))
+            return string.Empty;
+
+        return ticketId.Trim().ToUpperInvariant();
     }
 
     private async Task CleanupLoopAsync()

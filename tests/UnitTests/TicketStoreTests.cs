@@ -20,7 +20,7 @@ public class TicketStoreTests
         // Assert
         Assert.That(loaded, Is.Not.Null);
         Assert.That(loaded!.Status, Is.EqualTo(TicketStatus.Pending));
-        Assert.That(loaded.Code, Is.EqualTo("int a = 1;"));
+        Assert.That(loaded.SourceCode, Is.EqualTo("int a = 1;"));
     }
 
     [Test]
@@ -91,5 +91,38 @@ public class TicketStoreTests
 
         // Act / Assert
         await store.DisposeAsync();
+    }
+
+    [Test]
+    public void Create_ClientTicketCode_IsNormalizedAndListedWhenReady()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+
+        // Act
+        ReviewTicket created = store.Create("int a = 1;", "csharp", "7k3mp");
+        store.Complete(created.Id, "line1\nline2");
+        IReadOnlyList<ReviewTicket> ready = store.ListReady();
+        ReviewTicket? loaded = store.Get("7K3MP");
+
+        // Assert
+        Assert.That(created.Id, Is.EqualTo("7K3MP"));
+        Assert.That(loaded, Is.Not.Null);
+        Assert.That(ready, Has.Count.EqualTo(1));
+        Assert.That(ready[0].Lines, Is.EqualTo(new[] { "line1", "line2" }));
+    }
+
+    [Test]
+    public void ListReady_PendingTicket_IsExcluded()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        store.Create("int a = 1;", "csharp", "AAAAA");
+
+        // Act
+        IReadOnlyList<ReviewTicket> ready = store.ListReady();
+
+        // Assert
+        Assert.That(ready, Is.Empty);
     }
 }

@@ -4,20 +4,27 @@
 ### Health
 GET {{WebApi_HostAddress}}/
 
-### Paste page
-GET {{WebApi_HostAddress}}/paste
+### Preset (VRChat)
+GET {{WebApi_HostAddress}}/api/preset/1?k={{token}}
 
-### Ask
-POST {{WebApi_HostAddress}}/api/ask?k={{token}}
+### Submit code-review for VR ticket
+POST {{WebApi_HostAddress}}/api/code/submit
 Content-Type: application/json
 
 {
   "code": "class Student { public string Name; }",
-  "language": "csharp"
+  "language": "csharp",
+  "ticketCode": "7K3MP"
 }
 
-### Inbox (replace ticket id)
-GET {{WebApi_HostAddress}}/api/inbox/TICKET_ID?k={{token}}
+### Inbox (VRChat)
+GET {{WebApi_HostAddress}}/api/inbox?room=metalab&k={{token}}
 
-### Preset
-GET {{WebApi_HostAddress}}/api/preset/1?k={{token}}
+### Ask (legacy)
+POST {{WebApi_HostAddress}}/api/ask?k={{token}}
+Content-Type: application/json
+
+{
+  "code": "int x = 0;",
+  "language": "csharp"
+}

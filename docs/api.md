@@ -1,11 +1,10 @@
 # CodeSensei Backend API
 
 Бекенд — захищений проксі між VRChat-клієнтом (учасник B) і Google Gemini.
-Шари: `Domain` → `Application` → `Infrastructure` → `WebApi`.
-Заміна LLM-провайдера: файл `src/Infrastructure/LlmClient.cs` і більше нічого.
+Контракт сумісний з префабом `CodeSensei.unitypackage` (GET-only `VRCStringDownloader`).
 
-Власник коду: учасник A. Папки `src/`, `tests/` і цей файл ніхто інший не редагує.
-Ключ LLM бачить тільки A; він не передається учаснику B і не комітиться в Git.
+Шари: `Domain` → `Application` → `Infrastructure` → `WebApi`.
+Заміна LLM-провайдера: файл `src/Infrastructure/LlmClient.cs`.
 
 ## Змінні середовища
 
@@ -13,50 +12,52 @@
 | --- | --- |
 | `Gemini__ApiKey` | Ключ Google AI Studio. Обов'язковий у проді. |
 | `Gemini__Model` | Модель, за замовчуванням `gemini-flash-latest`. |
-| `App__AccessToken` | Спільний токен клієнта (`?k=` або заголовок `X-Access-Token`). |
+| `App__AccessToken` | Токен клієнта (`?k=` або `X-Access-Token`). У префабі: `secret123`. |
 | `App__DailyBudgetUsd` | Денний ліміт витрат, за замовчуванням `2`. |
 | `App__TicketTtlMinutes` | TTL тікета, за замовчуванням `15`. |
 
-Ключ задається лише в Environment Variables хостингу або в локальному `.env` / user-secrets. У `appsettings.json` поле порожнє навмисно.
+## Ендпоінти для VRChat (префаб B)
 
-## Захист відкритого проксі
+Базовий URL у префабі: `https://codesensei-d5zi.onrender.com` (після деплою цього коду той самий хост має віддавати цей контракт).
 
-- Усі `/api/*` вимагають токен.
-- Ліміт: 10 запитів / хвилина з однієї IP.
-- Денний ліміт витрат на LLM (оцінка токенів Gemini Flash).
-- Помилки LLM (таймаут 20 с, 429, 5xx) не валять процес: клієнт завжди отримує JSON-тіло.
+### `GET /api/preset/{id}?k=secret123`
+`id` = 1…24. Відповідь завжди 200:
 
-## Ендпоінти
+```json
+{"ok":true,"status":"explained","lines":["[1. Інкапсуляція]:","..."]}
+```
 
-### `POST /api/ask?k=<token>`
-Тіло: `{"code":"int x = 0;","language":"csharp"}`
+Невідомий id: `ok: true` і текст «тема поки не задана».
 
-- `202 Accepted`: `{"ticketId":"...","status":"Pending"}`
-- `400`: порожній код або понад 3000 символів
-- `401`: немає / невірний токен
-- `429`: ліміт IP або денний бюджет
+### `GET /api/inbox?room=metalab&k=secret123`
+Не dequeue. Повертає готові код-рев'ю:
 
-### `GET /api/inbox/{ticketId}?k=<token>`
-Аліас: `GET /api/inbox?ticketId={ticketId}&k=<token>` (як у старому клієнтському контракті).
+```json
+{"ok":true,"hasNew":true,"items":[{"code":"7K3MP","status":"completed","lines":["..."]}]}
+```
 
-- `200`: `{"ticketId":"...","status":"Pending|Completed|Error","result":"..."}`
-- `404`: немає тікета або TTL минув
-- Відповідь для термінала вже без markdown, рядки ≤ 55 символів, перенос по межі слова
+Порожня черга: `{"ok":true,"hasNew":false,"items":[]}`. Pending тікети не потрапляють у `items` (інакше термінал B зупинить polling).
 
-Клієнтський URL не змінювався: `http://localhost:5001`, токен `secret123`. JSON полів `ticketId` / `status` / `result` / `code` / `language` той самий, що в старій `docs/api.md`.
+### Потік код-рев'ю
+1. У VR термінал показує 5-символьний код.
+2. Студент відкриває `/paste`, вводить цей код і фрагмент.
+3. `POST /api/code/submit` з `{ "code", "language", "ticketCode" }` → `{ "ok": true, "ticketId": "7K3MP" }`.
+4. Термінал опитує inbox кожні ~6 с, поки не знайде `items[].code`.
 
-### `GET /api/preset/{id}?k=<token>`
-Готові фрагменти ООП: `1` інкапсуляція, `2` наслідування, `3` поліморфізм.
+`POST /api/code/submit` не вимагає `k` (як живий Render). Інші `/api/*` вимагають токен.
 
-### `GET /paste`
-HTML-форма для вставки коду під час демо. Токен підставляється з конфігурації сервера, не з репозиторію.
+## Інші ендпоінти
+
+- `POST /api/ask?k=` — те саме створення тікета, відповідь 202 `{ ticketId, status }`.
+- `GET /api/inbox/{ticketId}?k=` або `?ticketId=` — `{ ticketId, status, result }`.
+- `GET /paste` — HTML-форма з полем коду з термінала.
+- `GET /` — `{ "status": "running", "project": "CodeSensei" }`.
+
+Ліміт: 30 запитів / хв з IP (поллінг VR ~6 с). Денний бюджет LLM. Таймаут / 429 / 5xx не валять процес.
 
 ## Розгортання
 
-1. Зберіть Docker-образ із кореня репозиторію: `docker build -t codesensei-api .`
-2. На хостингу (Render / Fly / будь-який контейнер) вкажіть `Gemini__ApiKey` і `App__AccessToken`. Порт образу: `8080` (`ASPNETCORE_URLS=http://+:8080`).
-3. Локально: `dotnet run --project src/WebApi` (токен у Development: `secret123`).
-4. Перевірка: `GET /` має повернути `{"status":"running","project":"CodeSensei"}`.
-5. Тести: `dotnet test`.
-
-Під час демо A тримає процес живим і не роздає API-ключ. Учасник B отримує лише URL сервера і токен доступу.
+1. `docker build -t codesensei-api .`
+2. На Render задати `Gemini__ApiKey` і `App__AccessToken=secret123` (або оновити `VRCUrl` у префабі).
+3. Локально: `dotnet run --project src/WebApi`
+4. Тести: `dotnet test`

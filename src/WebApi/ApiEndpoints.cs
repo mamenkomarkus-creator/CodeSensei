@@ -14,16 +14,32 @@ public static class ApiEndpoints
     public static void MapCodeSenseiApi(this WebApplication app)
     {
         app.MapPost("/api/ask", AskAsync);
+        app.MapPost("/api/code/submit", SubmitAsync);
         app.MapGet("/api/preset/{id:int}", GetPreset);
-        app.MapGet("/api/inbox", InboxWithoutId);
-        app.MapGet("/api/inbox/{ticketId}", GetInbox);
+        app.MapGet("/api/inbox", GetInboxRoom);
+        app.MapGet("/api/inbox/{ticketId}", GetInboxById);
     }
 
-    private static async Task<IResult> AskAsync(
+    private static Task<IResult> AskAsync(
         HttpContext http,
         ITicketStore tickets,
         IDailyBudgetGuard budget,
-        ReviewOrchestrator orchestrator)
+        ReviewOrchestrator orchestrator) =>
+        SubmitCoreAsync(http, tickets, budget, orchestrator, vrClient: false);
+
+    private static Task<IResult> SubmitAsync(
+        HttpContext http,
+        ITicketStore tickets,
+        IDailyBudgetGuard budget,
+        ReviewOrchestrator orchestrator) =>
+        SubmitCoreAsync(http, tickets, budget, orchestrator, vrClient: true);
+
+    private static async Task<IResult> SubmitCoreAsync(
+        HttpContext http,
+        ITicketStore tickets,
+        IDailyBudgetGuard budget,
+        ReviewOrchestrator orchestrator,
+        bool vrClient)
     {
         AskRequest? body;
         try
@@ -32,42 +48,56 @@ public static class ApiEndpoints
         }
         catch (JsonException)
         {
-            return JsonError(400, "Некоректне JSON-тіло запиту.");
+            return vrClient
+                ? Results.Json(new SubmitRejected(false, "Некоректне JSON-тіло запиту."), statusCode: 400)
+                : JsonError(400, "Некоректне JSON-тіло запиту.");
         }
 
         string? validationError = CodeSubmissionValidator.Validate(body?.Code);
         if (validationError is not null)
-            return JsonError(400, validationError);
+        {
+            return vrClient
+                ? Results.Json(new SubmitRejected(false, validationError), statusCode: 400)
+                : JsonError(400, validationError);
+        }
 
         string language = string.IsNullOrWhiteSpace(body!.Language) ? "csharp" : body.Language.Trim();
         decimal estimate = DailyBudgetGuard.EstimateUsd(body.Code!.Length);
         if (!budget.TryConsume(estimate, out string? budgetError))
-            return JsonError(429, budgetError!);
+        {
+            return vrClient
+                ? Results.Json(new SubmitRejected(false, budgetError!), statusCode: 429)
+                : JsonError(429, budgetError!);
+        }
 
-        ReviewTicket ticket = tickets.Create(body.Code, language);
+        ReviewTicket ticket = tickets.Create(body.Code, language, body.TicketCode);
         _ = Task.Run(() => orchestrator.ProcessAsync(ticket.Id, language, body.Code));
 
-        return Results.Json(new AskResponse(ticket.Id, ticket.Status.ToString()), statusCode: StatusCodes.Status202Accepted);
+        return vrClient
+            ? Results.Json(new SubmitAccepted(true, ticket.Id))
+            : Results.Json(new AskResponse(ticket.Id, ticket.Status.ToString()), statusCode: StatusCodes.Status202Accepted);
     }
 
     private static IResult GetPreset(int id)
     {
-        PresetResponse? preset = PresetCatalog.Get(id);
-        return preset is null
-            ? JsonError(404, "Пресет не знайдено.")
-            : Results.Json(preset);
+        string[] lines = PresetCatalog.GetLines(id);
+        return Results.Json(new VrLinesResponse(true, "explained", lines));
     }
 
-    private static IResult InboxWithoutId(HttpContext http, ITicketStore tickets)
+    private static IResult GetInboxRoom(HttpContext http, ITicketStore tickets)
     {
         string? ticketId = http.Request.Query["ticketId"].ToString();
-        if (string.IsNullOrWhiteSpace(ticketId))
-            return JsonError(400, "Вкажіть ідентифікатор тікета: /api/inbox/{ticketId}.");
+        if (!string.IsNullOrWhiteSpace(ticketId))
+            return GetInboxById(ticketId, tickets);
 
-        return GetInbox(ticketId, tickets);
+        VrInboxItem[] items = tickets.ListReady()
+            .Select(t => new VrInboxItem(t.Id, MapStatus(t.Status), t.Lines))
+            .ToArray();
+
+        return Results.Json(new VrInboxResponse(true, items.Length > 0, items));
     }
 
-    private static IResult GetInbox(string ticketId, ITicketStore tickets)
+    private static IResult GetInboxById(string ticketId, ITicketStore tickets)
     {
         ReviewTicket? ticket = tickets.Get(ticketId);
         if (ticket is null)
@@ -75,6 +105,13 @@ public static class ApiEndpoints
 
         return Results.Json(new InboxResponse(ticket.Id, ticket.Status.ToString(), ticket.Result));
     }
+
+    private static string MapStatus(TicketStatus status) => status switch
+    {
+        TicketStatus.Completed => "completed",
+        TicketStatus.Error => "error",
+        _ => "pending"
+    };
 
     private static IResult JsonError(int statusCode, string message) =>
         Results.Json(new ErrorResponse(message), statusCode: statusCode);

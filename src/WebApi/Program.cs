@@ -32,7 +32,7 @@ builder.Services.AddRateLimiter(options =>
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 10,
+                PermitLimit = 30,
                 Window = TimeSpan.FromMinutes(1)
             }));
 });
@@ -74,6 +74,13 @@ app.UseRateLimiter();
 app.Use(async (context, next) =>
 {
     if (!context.Request.Path.StartsWithSegments("/api"))
+    {
+        await next();
+        return;
+    }
+
+    if (HttpMethods.IsPost(context.Request.Method)
+        && context.Request.Path.StartsWithSegments("/api/code/submit"))
     {
         await next();
         return;

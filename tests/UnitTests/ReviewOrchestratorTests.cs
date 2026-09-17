@@ -19,7 +19,7 @@ public class ReviewOrchestratorTests
         var orchestrator = new ReviewOrchestrator(llm, store);
 
         // Act
-        await orchestrator.ProcessAsync(ticket.Id, ticket.Language, ticket.Code);
+        await orchestrator.ProcessAsync(ticket.Id, ticket.Language, ticket.SourceCode);
         ReviewTicket? result = store.Get(ticket.Id);
 
         // Assert
@@ -40,7 +40,7 @@ public class ReviewOrchestratorTests
         var orchestrator = new ReviewOrchestrator(llm, store);
 
         // Act
-        await orchestrator.ProcessAsync(ticket.Id, ticket.Language, ticket.Code);
+        await orchestrator.ProcessAsync(ticket.Id, ticket.Language, ticket.SourceCode);
         ReviewTicket? result = store.Get(ticket.Id);
 
         // Assert
