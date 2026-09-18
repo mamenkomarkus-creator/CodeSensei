@@ -2,7 +2,7 @@
 @token = secret123
 
 ### Health
-GET {{WebApi_HostAddress}}/
+GET {{WebApi_HostAddress}}/health
 
 ### Preset (VRChat)
 GET {{WebApi_HostAddress}}/api/preset/1?k={{token}}

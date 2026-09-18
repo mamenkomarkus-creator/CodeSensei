@@ -1,0 +1,16 @@
+# Копія GitHub Action. Якщо .github/workflows/ не приймає push
+# (немає scope `workflow`), створи цей файл у GitHub UI:
+# Actions → New workflow → або Add file → .github/workflows/keep-render-awake.yml
+name: Keep Render awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping CodeSensei
+        run: curl -fsS -m 90 https://codesensei-d5zi.onrender.com/health

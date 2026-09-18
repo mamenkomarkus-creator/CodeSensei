@@ -406,6 +406,16 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 
+# Local tunnel binaries leftover from early debugging (not part of the app).
+ngrok
+cloudflared
+loclx.zip
+
+# PAT for this repo has no `workflow` scope; keep the Action YAML local.
+# In-repo copy that GitHub will accept: ops/keep-render-awake.yml
+.github/workflows/keep-render-awake.yml
+
+
 ##
 ## Visual studio for Mac
 ##
@@ -480,6 +490,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-# GitHub PAT for this repo cannot push workflow files (missing `workflow` scope).
-.github/workflows/keep-render-awake.yml

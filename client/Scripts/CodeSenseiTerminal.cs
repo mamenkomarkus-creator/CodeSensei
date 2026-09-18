@@ -25,7 +25,7 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
     public VRCUrl inboxUrl;
 
     public float ticketPollInterval = 6f;
-    public float ticketTimeoutSeconds = 120f;
+    public float ticketTimeoutSeconds = 180f;
 
     private const string TICKET_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     private const int TICKET_LENGTH = 5;
@@ -143,7 +143,7 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
 
             if (display != null)
             {
-                display.ShowStatus("Таймаут очікування код-рев'ю (2 хв). Спробуй ще раз.");
+                display.ShowStatus("Таймаут очікування код-рев'ю (3 хв). Спробуй ще раз.");
             }
 
             return;
@@ -251,7 +251,7 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
 
             if (display != null)
             {
-                display.ShowStatus("Таймаут очікування код-рев'ю (2 хв). Спробуй ще раз.");
+                display.ShowStatus("Таймаут очікування код-рев'ю (3 хв). Спробуй ще раз.");
             }
 
             return;
@@ -294,7 +294,7 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
                 code = codeToken.String;
             }
 
-            if (code != _currentTicketCode)
+            if (code.ToUpper() != _currentTicketCode)
             {
                 continue;
             }
@@ -305,6 +305,11 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
             if (item.TryGetValue("status", out statusToken) && statusToken.TokenType == TokenType.String)
             {
                 status = statusToken.String;
+            }
+
+            if (status != "completed" && status != "error")
+            {
+                continue;
             }
 
             string[] itemLines = new string[0];
@@ -327,13 +332,29 @@ public class CodeSenseiTerminal : UdonSharpBehaviour
 
             if (display != null)
             {
-                display.ShowStatus("Код-рев'ю отримано (" + status + ")");
+                if (status == "error")
+                {
+                    display.ShowStatus("Код-рев'ю з помилкою");
+                }
+                else
+                {
+                    display.ShowStatus("Код-рев'ю отримано");
+                }
+
                 display.ShowLines(itemLines);
             }
 
-            _state = STATE_IDLE;
+            if (status == "error")
+            {
+                _state = STATE_ERROR;
+                SyncAnswer(SYNC_STATUS_ERROR, JoinLines(itemLines));
+            }
+            else
+            {
+                _state = STATE_IDLE;
+                SyncAnswer(SYNC_STATUS_ANSWER, JoinLines(itemLines));
+            }
 
-            SyncAnswer(SYNC_STATUS_ANSWER, JoinLines(itemLines));
             return;
         }
     }

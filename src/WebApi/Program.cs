@@ -56,7 +56,7 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddHttpClient("llm", client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(20);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddSingleton<ILlmClient>(sp =>
 {
@@ -65,7 +65,9 @@ builder.Services.AddSingleton<ILlmClient>(sp =>
 });
 
 int ttlMinutes = builder.Configuration.GetValue("App:TicketTtlMinutes", 15);
-builder.Services.AddSingleton<ITicketStore>(_ => new InMemoryTicketStore(TimeSpan.FromMinutes(ttlMinutes)));
+int inboxMinutes = builder.Configuration.GetValue("App:InboxVisibilityMinutes", 3);
+builder.Services.AddSingleton<ITicketStore>(_ =>
+    new InMemoryTicketStore(TimeSpan.FromMinutes(ttlMinutes), TimeSpan.FromMinutes(inboxMinutes)));
 
 decimal dailyBudget = builder.Configuration.GetValue("App:DailyBudgetUsd", 2.00m);
 builder.Services.AddSingleton<IDailyBudgetGuard>(_ => new DailyBudgetGuard(dailyBudget));
@@ -132,7 +134,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.MapGet("/", () => Results.Json(new { status = "running", project = "CodeSensei" }));
+app.MapGet("/", () => Results.Json(HealthPayload()));
+app.MapGet("/health", () => Results.Json(HealthPayload()));
 
 app.MapGet("/paste", async context =>
 {
@@ -146,3 +149,12 @@ app.MapGet("/paste", async context =>
 app.MapCodeSenseiApi();
 
 app.Run();
+
+static object HealthPayload()
+{
+    string sha = Environment.GetEnvironmentVariable("RENDER_GIT_COMMIT")
+                 ?? Environment.GetEnvironmentVariable("APP_COMMIT")
+                 ?? "local";
+    string commit = sha.Length <= 7 ? sha : sha[..7];
+    return new { status = "running", project = "CodeSensei", commit };
+}

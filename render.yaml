@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: codesensei
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: Gemini__ApiKey
+        sync: false
+      - key: App__AccessToken
+        value: secret123
+      - key: Gemini__Model
+        value: gemini-flash-latest
+      - key: App__DailyBudgetUsd
+        value: "2"
+      - key: App__TicketTtlMinutes
+        value: "15"
+      - key: App__InboxVisibilityMinutes
+        value: "3"

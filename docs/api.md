@@ -15,6 +15,7 @@
 | `App__AccessToken` | Токен клієнта (`?k=` або `X-Access-Token`). У префабі: `secret123`. |
 | `App__DailyBudgetUsd` | Денний ліміт витрат, за замовчуванням `2`. |
 | `App__TicketTtlMinutes` | TTL тікета, за замовчуванням `15`. |
+| `App__InboxVisibilityMinutes` | Скільки хвилин готове рев'ю видно в inbox, за замовчуванням `3`. |
 
 ## Ендпоінти для VRChat (префаб B)
 
@@ -51,7 +52,7 @@
 - `POST /api/ask?k=` — те саме створення тікета, відповідь 202 `{ ticketId, status }`.
 - `GET /api/inbox/{ticketId}?k=` або `?ticketId=` — `{ ticketId, status, result }`.
 - `GET /paste` — HTML-форма з полем коду з термінала.
-- `GET /` — `{ "status": "running", "project": "CodeSensei" }`.
+- `GET /` і `GET /health` — `{ "status": "running", "project": "CodeSensei", "commit": "..." }`.
 
 Ліміт: 60 запитів / хв з IP (поллінг VR ~6 с). Денний бюджет LLM. Таймаут / 429 / 5xx не валять процес. `POST /api/code/submit` вимагає валідний 5-символьний `ticketCode`.
 
@@ -62,6 +63,6 @@
 3. Локально: `dotnet run --project src/WebApi`
 4. Тести: `dotnet test`
 
-Keep-alive workflow лежить локально в `.github/workflows/keep-render-awake.yml` (токен GitHub без scope `workflow` не дає запушити YAML). Додай файл через UI GitHub або токен з цим scope — тоді Action пінгуватиме `/` кожні 10 хвилин.
+Keep-alive: `.github/workflows/keep-render-awake.yml` пінгує `/health` кожні 10 хвилин. Якщо GitHub не приймає workflow-файл, візьми копію з `ops/keep-render-awake.yml` і створи Action в UI.
 
 Клієнт VRChat лежить у `client/CodeSensei.unitypackage`. Як вставити префаб у MetaLab — `client/README.md`.

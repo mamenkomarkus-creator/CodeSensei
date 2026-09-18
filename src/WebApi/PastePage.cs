@@ -26,10 +26,10 @@ public static class PastePage
         <body>
             <div class="card">
                 <h2>CodeSensei — вставка фрагмента</h2>
-                <p class="hint">Введи код з VR-термінала (5 символів), встав фрагмент і надішли. Термінал забере результат з inbox.</p>
+                <p class="hint">1) У VR натисни код-рев'ю — термінал покаже 5-символьний код.<br>2) Введи той код сюди, встав фрагмент, надішли.<br>3) Залишайся біля термінала: він сам забере відповідь (до 3 хв).</p>
                 <form id="paste-form">
                     <label for="ticketCode">Код з термінала:</label>
-                    <input id="ticketCode" name="ticketCode" maxlength="8" placeholder="наприклад 7K3MP" required>
+                    <input id="ticketCode" name="ticketCode" maxlength="5" placeholder="7K3MP" autocapitalize="characters" autocomplete="off" required>
                     <label for="language">Мова:</label>
                     <select id="language" name="language">
                         <option value="csharp">C#</option>
@@ -51,10 +51,15 @@ public static class PastePage
                     event.preventDefault();
                     const code = document.getElementById('code').value;
                     const language = document.getElementById('language').value;
-                    const ticketCode = document.getElementById('ticketCode').value.trim();
+                    const ticketCode = document.getElementById('ticketCode').value.trim().toUpperCase();
+                    document.getElementById('ticketCode').value = ticketCode;
                     responseDiv.style.display = 'block';
                     if (!ticketCode) {
                         responseDiv.innerText = 'Введи код з VR-термінала.';
+                        return;
+                    }
+                    if (!/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{5}$/.test(ticketCode)) {
+                        responseDiv.innerText = 'Код має бути рівно 5 символів без 0, O, I, 1.';
                         return;
                     }
                     if (!code.trim()) {
@@ -70,6 +75,10 @@ public static class PastePage
                             body: JSON.stringify({ code, language, ticketCode })
                         });
                         const data = await res.json();
+                        if (res.status === 409) {
+                            responseDiv.innerText = 'Цей код уже обробляється. Зачекай на терміналі або згенеруй новий.';
+                            return;
+                        }
                         if (!data.ok) {
                             responseDiv.innerText = 'Помилка: ' + (data.error || res.status);
                             return;
