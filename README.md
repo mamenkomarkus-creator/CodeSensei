@@ -4,7 +4,9 @@ VR-ментор з ООП для лабораторії KPI / MetaLab: Unity-т�
 
 Живий бекенд: https://codesensei-d5zi.onrender.com  
 Вставка коду: https://codesensei-d5zi.onrender.com/paste  
-Репозиторій: https://github.com/mamenkomarkus-creator/CodeSensei
+Репозиторій: https://github.com/mamenkomarkus-creator/CodeSensei  
+Презентація NEXT: [`docs/presentation/CodeSensei-NEXT-presentation.pptx`](docs/presentation/CodeSensei-NEXT-presentation.pptx)  
+Інтеграція в Metaverse: [`docs/NEXT-INTEGRATION.md`](docs/NEXT-INTEGRATION.md)
 
 ## Що вже готово
 
@@ -43,6 +45,8 @@ client/CodeSensei.unitypackage                    префаб для Unity
 client/Scripts/                                   UdonSharp (читати/підхопити в Git)
 client/README.md                                  імпорт у MetaLab
 docs/api.md                                       HTTP-контракт
+docs/NEXT-INTEGRATION.md                          інтеграція в VRChat / MetaLab
+docs/presentation/                                презентація конкурсу NEXT
 ops/keep-render-awake.yml                         копія keep-alive Action
 .github/workflows/keep-render-awake.yml           ping /health кожні 10 хв
 render.yaml                                       Blueprint Render
