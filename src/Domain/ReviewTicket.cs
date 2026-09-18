@@ -9,6 +9,7 @@ public sealed class ReviewTicket
     public string? Result { get; private set; }
     public DateTime CreatedAtUtc { get; }
     public DateTime ExpiresAtUtc { get; }
+    public DateTime? FinishedAtUtc { get; private set; }
 
     public ReviewTicket(string id, string sourceCode, string language, TimeSpan ttl)
     {
@@ -37,11 +38,13 @@ public sealed class ReviewTicket
     {
         Status = TicketStatus.Completed;
         Result = formattedResult;
+        FinishedAtUtc = DateTime.UtcNow;
     }
 
     public void Fail(string message)
     {
         Status = TicketStatus.Error;
         Result = message;
+        FinishedAtUtc = DateTime.UtcNow;
     }
 }

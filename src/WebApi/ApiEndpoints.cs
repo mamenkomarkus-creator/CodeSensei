@@ -61,6 +61,21 @@ public static class ApiEndpoints
                 : JsonError(400, validationError);
         }
 
+        if (vrClient)
+        {
+            string? ticketError = TicketCodeValidator.Validate(body!.TicketCode);
+            if (ticketError is not null)
+                return Results.Json(new SubmitRejected(false, ticketError), statusCode: 400);
+
+            ReviewTicket? existing = tickets.Get(body.TicketCode);
+            if (existing is not null && existing.Status == TicketStatus.Pending)
+            {
+                return Results.Json(
+                    new SubmitRejected(false, "Код уже обробляється. Згенеруй новий у VR-терміналі."),
+                    statusCode: 409);
+            }
+        }
+
         string language = string.IsNullOrWhiteSpace(body!.Language) ? "csharp" : body.Language.Trim();
         decimal estimate = DailyBudgetGuard.EstimateUsd(body.Code!.Length);
         if (!budget.TryConsume(estimate, out string? budgetError))

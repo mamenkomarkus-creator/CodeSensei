@@ -21,8 +21,25 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.OnRejected = async (context, token) =>
     {
-        context.HttpContext.Response.ContentType = "application/json";
-        await context.HttpContext.Response.WriteAsJsonAsync(
+        HttpContext http = context.HttpContext;
+        http.Response.ContentType = "application/json";
+        if (http.Request.Path.StartsWithSegments("/api/inbox"))
+        {
+            await http.Response.WriteAsJsonAsync(
+                new VrInboxResponse(false, false, Array.Empty<VrInboxItem>()),
+                token);
+            return;
+        }
+
+        if (http.Request.Path.StartsWithSegments("/api/preset"))
+        {
+            await http.Response.WriteAsJsonAsync(
+                new VrLinesResponse(false, "error", ["Забагато запитів. Спробуйте пізніше."]),
+                token);
+            return;
+        }
+
+        await http.Response.WriteAsJsonAsync(
             new ErrorResponse("Забагато запитів з цієї IP-адреси. Спробуйте пізніше."),
             token);
     };
@@ -32,7 +49,7 @@ builder.Services.AddRateLimiter(options =>
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 30,
+                PermitLimit = 60,
                 Window = TimeSpan.FromMinutes(1)
             }));
 });
@@ -66,9 +83,6 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-if (!app.Environment.IsDevelopment())
-    app.UseHttpsRedirection();
-
 app.UseRateLimiter();
 
 app.Use(async (context, next) =>
@@ -98,6 +112,19 @@ app.Use(async (context, next) =>
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         context.Response.ContentType = "application/json";
+        if (context.Request.Path.StartsWithSegments("/api/inbox"))
+        {
+            await context.Response.WriteAsJsonAsync(new VrInboxResponse(false, false, Array.Empty<VrInboxItem>()));
+            return;
+        }
+
+        if (context.Request.Path.StartsWithSegments("/api/preset"))
+        {
+            await context.Response.WriteAsJsonAsync(
+                new VrLinesResponse(false, "error", ["Недійсний токен доступу."]));
+            return;
+        }
+
         await context.Response.WriteAsJsonAsync(new ErrorResponse("Недійсний токен доступу."));
         return;
     }

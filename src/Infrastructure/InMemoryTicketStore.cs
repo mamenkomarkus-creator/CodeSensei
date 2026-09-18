@@ -13,9 +13,12 @@ public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDispo
     private readonly Task _cleanupTask;
     private bool _disposed;
 
-    public InMemoryTicketStore(TimeSpan? ttl = null)
+    private readonly TimeSpan _inboxVisibility;
+
+    public InMemoryTicketStore(TimeSpan? ttl = null, TimeSpan? inboxVisibility = null)
     {
         _ttl = ttl ?? TimeSpan.FromMinutes(15);
+        _inboxVisibility = inboxVisibility ?? TimeSpan.FromMinutes(3);
         _timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
         _cleanupTask = CleanupLoopAsync();
     }
@@ -50,8 +53,12 @@ public sealed class InMemoryTicketStore : ITicketStore, IAsyncDisposable, IDispo
     public IReadOnlyList<ReviewTicket> ListReady()
     {
         CleanupExpired();
+        DateTime cutoff = DateTime.UtcNow - _inboxVisibility;
         return _tickets.Values
-            .Where(t => !t.IsExpired && t.Status is TicketStatus.Completed or TicketStatus.Error)
+            .Where(t => !t.IsExpired
+                        && t.Status is TicketStatus.Completed or TicketStatus.Error
+                        && t.FinishedAtUtc is not null
+                        && t.FinishedAtUtc.Value >= cutoff)
             .ToArray();
     }
 

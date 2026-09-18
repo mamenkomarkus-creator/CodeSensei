@@ -27,6 +27,12 @@ public sealed class ReviewOrchestrator
             }
 
             string formatted = TextFormatter.FormatForTerminal(result.Text);
+            if (string.IsNullOrWhiteSpace(formatted))
+            {
+                _ticketStore.Fail(ticketId, "Модель повернула порожню відповідь.");
+                return;
+            }
+
             _ticketStore.Complete(ticketId, formatted);
         }
         catch (OperationCanceledException)

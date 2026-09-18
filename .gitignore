@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# GitHub PAT for this repo cannot push workflow files (missing `workflow` scope).
+.github/workflows/keep-render-awake.yml

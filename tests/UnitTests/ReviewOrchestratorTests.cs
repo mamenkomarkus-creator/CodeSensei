@@ -48,6 +48,24 @@ public class ReviewOrchestratorTests
         Assert.That(result.Result, Does.Contain("429"));
     }
 
+    [Test]
+    public async Task ProcessAsync_EmptyFormattedOutput_MarksTicketError()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        ReviewTicket ticket = store.Create("int c = 3;", "csharp");
+        var llm = new StubLlmClient(new LlmResult(true, "```\n```"));
+        var orchestrator = new ReviewOrchestrator(llm, store);
+
+        // Act
+        await orchestrator.ProcessAsync(ticket.Id, ticket.Language, ticket.SourceCode);
+        ReviewTicket? result = store.Get(ticket.Id);
+
+        // Assert
+        Assert.That(result!.Status, Is.EqualTo(TicketStatus.Error));
+        Assert.That(result.Result, Does.Contain("порожню"));
+    }
+
     private sealed class StubLlmClient : ILlmClient
     {
         private readonly LlmResult _result;

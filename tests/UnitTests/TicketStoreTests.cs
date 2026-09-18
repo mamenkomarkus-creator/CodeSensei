@@ -125,4 +125,36 @@ public class TicketStoreTests
         // Assert
         Assert.That(ready, Is.Empty);
     }
+
+    [Test]
+    public void ListReady_ErrorTicket_IsIncluded()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15));
+        ReviewTicket created = store.Create("int a = 1;", "csharp", "ERR01");
+
+        // Act
+        store.Fail(created.Id, "fail");
+        IReadOnlyList<ReviewTicket> ready = store.ListReady();
+
+        // Assert
+        Assert.That(ready, Has.Count.EqualTo(1));
+        Assert.That(ready[0].Status, Is.EqualTo(TicketStatus.Error));
+    }
+
+    [Test]
+    public async Task ListReady_StaleCompletedTicket_IsExcluded()
+    {
+        // Arrange
+        using var store = new InMemoryTicketStore(TimeSpan.FromMinutes(15), TimeSpan.FromMilliseconds(40));
+        ReviewTicket created = store.Create("int a = 1;", "csharp", "STALE");
+        store.Complete(created.Id, "old");
+
+        // Act
+        await Task.Delay(80);
+        IReadOnlyList<ReviewTicket> ready = store.ListReady();
+
+        // Assert
+        Assert.That(ready, Is.Empty);
+    }
 }

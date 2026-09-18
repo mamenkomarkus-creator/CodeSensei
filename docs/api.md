@@ -36,7 +36,7 @@
 {"ok":true,"hasNew":true,"items":[{"code":"7K3MP","status":"completed","lines":["..."]}]}
 ```
 
-Порожня черга: `{"ok":true,"hasNew":false,"items":[]}`. Pending тікети не потрапляють у `items` (інакше термінал B зупинить polling).
+Порожня черга: `{"ok":true,"hasNew":false,"items":[]}`. Pending тікети не потрапляють у `items` (інакше термінал B зупинить polling). Готовий результат видно в inbox лише 3 хвилини після `completed`/`error`.
 
 ### Потік код-рев'ю
 1. У VR термінал показує 5-символьний код.
@@ -53,7 +53,7 @@
 - `GET /paste` — HTML-форма з полем коду з термінала.
 - `GET /` — `{ "status": "running", "project": "CodeSensei" }`.
 
-Ліміт: 30 запитів / хв з IP (поллінг VR ~6 с). Денний бюджет LLM. Таймаут / 429 / 5xx не валять процес.
+Ліміт: 60 запитів / хв з IP (поллінг VR ~6 с). Денний бюджет LLM. Таймаут / 429 / 5xx не валять процес. `POST /api/code/submit` вимагає валідний 5-символьний `ticketCode`.
 
 ## Розгортання
 
@@ -61,3 +61,7 @@
 2. На Render задати `Gemini__ApiKey` і `App__AccessToken=secret123` (або оновити `VRCUrl` у префабі).
 3. Локально: `dotnet run --project src/WebApi`
 4. Тести: `dotnet test`
+
+Keep-alive workflow лежить локально в `.github/workflows/keep-render-awake.yml` (токен GitHub без scope `workflow` не дає запушити YAML). Додай файл через UI GitHub або токен з цим scope — тоді Action пінгуватиме `/` кожні 10 хвилин.
+
+Клієнт VRChat лежить у `client/CodeSensei.unitypackage`. Як вставити префаб у MetaLab — `client/README.md`.
