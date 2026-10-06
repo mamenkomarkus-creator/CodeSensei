@@ -57,7 +57,7 @@ render.yaml                                       Blueprint Render
 
 ```bash
 cp .env.example .env
-# впиши Gemini__ApiKey
+# впиши Gemini__ApiKey у .env (WebApi підхоплює файл сам)
 dotnet test
 dotnet run --project src/WebApi
 ```

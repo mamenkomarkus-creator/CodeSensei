@@ -7,6 +7,8 @@ using Application.Reviews;
 using Infrastructure;
 using WebApi;
 
+LocalEnv.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
