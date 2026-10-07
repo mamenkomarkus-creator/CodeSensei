@@ -1,5 +1,7 @@
 # CodeSensei
 
+**Команда KP_Devs** · проєкт CodeSensei
+
 AI-ментор з об’єктно-орієнтованого програмування для віртуальної зали MetaLab у VRChat. Проєкт конкурсу Erasmus+ NEXT, КПІ ім. Ігоря Сікорського. Тімлід — **Маменко Марк**.
 
 Парний проєкт простору: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT). CodeSensei не будує кімнату. Він стоїть у вже зібраній лабораторії і відповідає на питання з ООП та на фрагменти коду.
@@ -10,7 +12,7 @@ AI-ментор з об’єктно-орієнтованого програму
   <img src="presentation-materials/lab/01-overview.jpg" alt="MetaLab — наша лабораторія" width="880">
 </p>
 
-## Склад команди
+## Склад команди KP_Devs
 
 | Ім’я | Роль |
 | --- | --- |
@@ -54,7 +56,9 @@ Udon не відправляє тіло запиту, тому рев’ю не 
 
 # English
 
-An OOP mentor for the MetaLab hall in VRChat, built for the Erasmus+ NEXT contest at Igor Sikorsky KPI. Team lead: **Mark Mamenko**. The room itself is [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT). CodeSensei does not model the lab. It teaches inside it.
+**Team KP_Devs** · project CodeSensei
+
+An OOP mentor for the MetaLab hall in VRChat, built for the Erasmus+ NEXT contest at Igor Sikorsky KPI. Team lead: **Mark Mamenko**. The room itself is [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (team Bilka). CodeSensei does not model the lab. It teaches inside it.
 
 ## 1. Annotation
 

@@ -1,6 +1,6 @@
 # Presentation materials
 
-Матеріали конкурсу NEXT для **CodeSensei**. Фото — лише наша лабораторія MetaLab.
+Матеріали конкурсу NEXT для **CodeSensei** (команда **KP_Devs**). Фото — лише наша лабораторія MetaLab.
 
 | | |
 | --- | --- |

@@ -1,7 +1,9 @@
 # Документація CodeSensei
 
+**Команда KP_Devs** · проєкт CodeSensei
+
 Erasmus+ NEXT Student Creative Project Competition · КПІ ім. Ігоря Сікорського  
-Тімлід: Маменко Марк · парний проєкт зали: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT)
+Тімлід: Маменко Марк · парна зала: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (команда Bilka)
 
 Світ: https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info  
 API: https://codesensei-d5zi.onrender.com  

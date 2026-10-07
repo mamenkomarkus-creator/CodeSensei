@@ -1,5 +1,8 @@
 # Команда / Team
 
+**Назва команди / Team name:** KP_Devs  
+**Проєкт / Project:** CodeSensei
+
 КПІ ім. Ігоря Сікорського · Igor Sikorsky Kyiv Polytechnic Institute  
 Erasmus+ NEXT Student Creative Project Competition
 
@@ -13,4 +16,4 @@ Erasmus+ NEXT Student Creative Project Competition
 | Павленко Святослав | Sviatoslav Pavlenko | UdonSharp — UI-термінал, GET-only клієнт VRChat |
 | Пошитнюк Дмитро | Dmytro Poshytyniuk | Integration — збірка світу MetaLab, VRChat SDK |
 
-Парний проєкт зали: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (тімлід Павленко Святослав).
+Парний проєкт зали: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT), команда Bilka (тімлід Павленко Святослав).

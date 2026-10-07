@@ -78,7 +78,7 @@ function addImageRels(slideNo, rels) {
 let s1 = readSlide(1);
 s1 = s1.replace("[Project Title]", "CodeSensei");
 s1 = s1.replace(" [Nomination I / Nomination II]", " Nomination I — Virtual university location");
-s1 = s1.replace("[Team Name]", "CodeSensei");
+s1 = s1.replace("[Team Name]", "KP_Devs");
 s1 = s1.replace("[University Name]", "Igor Sikorsky Kyiv Polytechnic Institute");
 s1 = s1.replace(
   "[Name Surname], [Name Surname, Name Surname…]",
