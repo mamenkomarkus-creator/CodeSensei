@@ -66,3 +66,5 @@
 Keep-alive: `.github/workflows/keep-render-awake.yml` пінгує `/health` кожні 10 хвилин. Якщо GitHub не приймає workflow-файл, візьми копію з `ops/keep-render-awake.yml` і створи Action в UI.
 
 Клієнт VRChat лежить у `client/CodeSensei.unitypackage`. Як вставити префаб у MetaLab — `client/README.md`.
+
+Презентація, інтеграція та демо-відео: [`presentation-materials/`](../presentation-materials/).

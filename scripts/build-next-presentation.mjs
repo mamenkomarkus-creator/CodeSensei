@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const srcPptx = "/tmp/next-template/pptx";
 const work = "/tmp/next-template/filled";
 const assets = "/Users/markmamenko/.cursor/projects/Users-markmamenko-Projects-CodeSensei/assets";
-const outDir = path.join(root, "docs/presentation");
+const outDir = path.join(root, "presentation-materials");
 const outPptx = path.join(outDir, "CodeSensei-NEXT-presentation.pptx");
 
 fs.rmSync(work, { recursive: true, force: true });
@@ -226,7 +226,7 @@ s9 = s9.replace(
 );
 s9 = s9.replace(
   "[Add any other relevant links or documentation.]",
-  "VRChat: https://hello.vrchat.com/   NEXT: https://nextstudy.eu/   Integration notes: docs/NEXT-INTEGRATION.md"
+  "VRChat: https://hello.vrchat.com/   NEXT: https://nextstudy.eu/   Integration notes: presentation-materials/documentation/next-integration.md"
 );
 s9 = s9.replace(
   " Make sure all links and QR codes are accessible and working.",

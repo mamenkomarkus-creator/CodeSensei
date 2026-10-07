@@ -1,95 +1,108 @@
 # CodeSensei
 
-VR-ментор з ООП для лабораторії KPI / MetaLab: Unity-термінал у VRChat + .NET API, який проксує Google Gemini.
+VR-ментор з об’єктно-орієнтованого програмування для лабораторії КПІ / MetaLab: термінал у VRChat і .NET API, який проксує Google Gemini.
 
-Живий бекенд: https://codesensei-d5zi.onrender.com  
-Вставка коду: https://codesensei-d5zi.onrender.com/paste  
-Репозиторій: https://github.com/mamenkomarkus-creator/CodeSensei  
-Презентація NEXT: [`docs/presentation/CodeSensei-NEXT-presentation.pptx`](docs/presentation/CodeSensei-NEXT-presentation.pptx)  
-Інтеграція в Metaverse: [`docs/NEXT-INTEGRATION.md`](docs/NEXT-INTEGRATION.md)
+Erasmus+ **NEXT** Student Creative Project Competition · КПІ ім. Ігоря Сікорського
 
-## Що вже готово
+[Демо /paste](https://codesensei-d5zi.onrender.com/paste) · [Health](https://codesensei-d5zi.onrender.com/health) · [Світ MetaLab](https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info) · [Відео](presentation-materials/demo-video.mp4) · [Презентація](presentation-materials/CodeSensei-NEXT-presentation.pptx)
 
-- Бекенд на Render (Docker, порт 8080), гілка `main`.
-- Пресети 1–24 і код-рев'ю через `/paste` під GET-only клієнт VRChat.
-- Клієнтський пакет `client/CodeSensei.unitypackage` і ті самі скрипти в `client/Scripts/`.
-- Тести: `dotnet test` (36+).
+<p align="center">
+  <img src="presentation-materials/terminal.png" alt="Термінал CodeSensei у віртуальній лабораторії" width="880">
+</p>
 
-Звідси **неможливо** імпортувати префаб у MetaLab і зайти в VRChat — це роблять учасники E і B в Unity.
+Парний проєкт простору: **[MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT)** — віртуальна зала MacPaw AI Lab. CodeSensei — AI-ментор, який стоїть у цій залі.
 
-## Хто що робить на демо
+## Короткий опис
 
-| Хто | Дія |
+Студент у VR натискає пресет з ООП або запускає код-рев’ю. Термінал показує 5-символьний код; фрагмент коду надсилається з телефона чи ноута на `/paste`. За кілька секунд відповідь ментора з’являється на спільному екрані в VRChat.
+
+Бекенд тримає ключ LLM на сервері. Клієнт VRChat ходить лише GET-запитами (`VRCStringDownloader`), бо Udon не вміє POST.
+
+## Склад команди
+
+| Ім’я | Роль |
 | --- | --- |
-| A (бекенд) | Репо + Render. Перед демо відкрий `/paste` або `/health`, щоб розбудити Free-інстанс (~30–50 с). |
-| E (збірка світу) | Імпорт пакета в MetaLab, префаб на сцену, білд VRChat. |
-| B (термінал) | У VRChat: Settings → Security → **Allow Untrusted URLs**. Пресет-кнопка, потім код-рев'ю. |
-| Студент | Код з термінала (5 символів) → `/paste` → чекає на екрані. |
+| **Маменко Марк** | Team lead · backend (.NET, Gemini, Render) |
+| Шозда Катерина | Learning design · пресети ООП, промпти ментора |
+| Ільєнко Денис | QA · тести, контракт API, чекліст демо |
+| Павленко Святослав | VRChat-клієнт · UdonSharp, префаб термінала |
+| Пошитнюк Дмитро | Збірка світу MetaLab · VRChat SDK, розміщення на сцені |
 
-## Демо-сценарій (3–5 хв)
+Детальніше: [AUTHORS.md](AUTHORS.md)
 
-1. Відкрити https://codesensei-d5zi.onrender.com/health — має бути `{"status":"running","project":"CodeSensei","commit":"..."}`.
-2. У світі натиснути пресет (наприклад 1. Інкапсуляція) — на терміналі з’являються рядки.
-3. Натиснути код-рев'ю. Термінал покаже код на кшталт `7K3MP`.
-4. На телефоні/ноуті відкрити `/paste`, ввести цей код, вставити фрагмент C#, надіслати.
-5. За 10–40 с термінал друкує рев'ю (Помилки / ООП / Підказка).
+## Як використовувати
 
-Якщо перший запит «немає з'єднання» — інстанс спав або в VRChat вимкнені Untrusted URLs. Повторити після `/health`.
+### У VRChat (демо)
 
-## Вміст репозиторію
+1. Відкрийте [health](https://codesensei-d5zi.onrender.com/health), щоб розбудити Free-інстанс Render (~30–50 с).
+2. Зайдіть у [світ MetaLab](https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info).
+3. У VRChat: **Settings → Security → Allow Untrusted URLs**.
+4. Натисніть пресет (наприклад «Інкапсуляція») — на терміналі з’являться рядки.
+5. Натисніть **Код-рев’ю**. Термінал покаже код на кшталт `7K3MP`.
+6. На телефоні відкрийте [paste](https://codesensei-d5zi.onrender.com/paste), введіть цей код і фрагмент C#.
+7. За 10–40 с термінал друкує рев’ю (Помилки / ООП / Підказка).
 
-```
-src/Domain, Application, Infrastructure, WebApi   бекенд
-tests/UnitTests                                   NUnit
-client/CodeSensei.unitypackage                    префаб для Unity
-client/Scripts/                                   UdonSharp (читати/підхопити в Git)
-client/README.md                                  імпорт у MetaLab
-docs/api.md                                       HTTP-контракт
-docs/NEXT-INTEGRATION.md                          інтеграція в VRChat / MetaLab
-docs/presentation/                                презентація конкурсу NEXT
-ops/keep-render-awake.yml                         копія keep-alive Action
-.github/workflows/keep-render-awake.yml           ping /health кожні 10 хв
-render.yaml                                       Blueprint Render
-.env.example                                      змінні без секретів
-```
+Якщо на екрані `Not trusted url hit` — не ввімкнено Untrusted URLs. Якщо «немає з’єднання» після першого запиту — інстанс ще спав; повторіть після `/health`.
 
-## Локальний запуск
+### Імпорт термінала в Unity
+
+Інструкція: [`client/README.md`](client/README.md). Пакет: `client/CodeSensei.unitypackage`.
+
+### Локальний запуск API
 
 ```bash
-cp .env.example .env
-# впиши Gemini__ApiKey у .env (WebApi підхоплює файл сам)
+cp .env.example .env   # впишіть Gemini__ApiKey
 dotnet test
 dotnet run --project src/WebApi
 ```
 
-API: http://localhost:5001 (див. `launchSettings.json`).  
-Токен клієнта: `secret123` (як у префабі). Не комітьти `.env`.
+API: http://localhost:5001  
+Токен клієнта: `secret123` (як у префабі). Файл `.env` не комітити.
 
-```bash
-docker build -t codesensei-api .
-docker run --rm -p 8080:8080 --env-file .env codesensei-api
+HTTP-контракт: [`docs/api.md`](docs/api.md).
+
+## Результати
+
+- Живий бекенд на Render: https://codesensei-d5zi.onrender.com
+- 24 пресети ООП і код-рев’ю під GET-only клієнт VRChat
+- Unity-пакет термінала для світу MetaLab
+- Модульні тести: `dotnet test`
+- Презентація, документація та спільне демо-відео: [`presentation-materials/`](presentation-materials/)
+
+## Вміст репозиторію
+
+```
+src/                  бекенд (Domain, Application, Infrastructure, WebApi)
+tests/UnitTests       NUnit
+client/               UdonSharp + CodeSensei.unitypackage
+docs/api.md           HTTP-контракт
+presentation-materials/  презентація, документація, відео
 ```
 
-## Render
+---
 
-Сервіс уже створений, гілка **main**. Env:
+# English
 
-| Змінна | Значення |
+**CodeSensei** is an OOP mentor for the KPI / MetaLab virtual classroom: a VRChat terminal plus a .NET API that proxies Google Gemini.
+
+[Paste demo](https://codesensei-d5zi.onrender.com/paste) · [Health](https://codesensei-d5zi.onrender.com/health) · [MetaLab world](https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info) · [Demo video](presentation-materials/demo-video.mp4) · [Slides](presentation-materials/CodeSensei-NEXT-presentation.pptx)
+
+Paired space project: **[MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT)**.
+
+### Team
+
+| Name | Role |
 | --- | --- |
-| `Gemini__ApiKey` | ключ Google AI Studio |
-| `App__AccessToken` | `secret123` |
-| `Gemini__Model` | `gemini-flash-latest` (необов'язково) |
+| **Mark Mamenko** | Team lead · backend (.NET, Gemini, Render) |
+| Kateryna Shozda | Learning design · OOP presets, mentor prompts |
+| Denys Ilienko | QA · tests, API contract, demo checklist |
+| Sviatoslav Pavlenko | VRChat client · UdonSharp terminal prefab |
+| Dmytro Poshytyniuk | MetaLab world assembly · VRChat SDK |
 
-Після пушу в `main` Render збирає Docker сам. Коміт на проді видно в `/health` (`commit`).
+### How to use
 
-Keep-alive: GitHub цим токеном не приймає `.github/workflows/*.yml`. Канонічна копія в репо — `ops/keep-render-awake.yml`. Створи Action вручну: GitHub → Actions → New workflow → встав цей файл як `.github/workflows/keep-render-awake.yml`. Локально: `bash scripts/keep-awake.sh`.
+Wake https://codesensei-d5zi.onrender.com/health, join the MetaLab world, enable **Allow Untrusted URLs**, press an OOP preset or **Code review**. Enter the 5-character ticket on `/paste`. Import the prefab via [`client/README.md`](client/README.md). Local API: `dotnet run --project src/WebApi`.
 
-## Контракт VRChat
+### Results
 
-GET-only, токен `?k=secret123`.
-
-- `GET /api/preset/{1-24}` → `{ok,status,lines}`
-- `GET /api/inbox?room=metalab` → `{ok,hasNew,items[{code,status,lines}]}` (лише `completed`/`error`, 3 хв)
-- `POST /api/code/submit` `{code,language,ticketCode}` — без `k`, код 5 символів без 0/O/I/1
-
-Деталі: `docs/api.md`.
+Live Render backend, 24 OOP presets, Unity terminal package, NUnit tests, and contest materials (slides, docs, shared demo video) in [`presentation-materials/`](presentation-materials/).
