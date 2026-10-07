@@ -48,7 +48,7 @@ AI-ментор з об’єктно-орієнтованого програму
 
 ## 4. Труднощі та ліміти
 
-Udon не відправляє тіло запиту, тому рев’ю не відбувається «прямо з клавіатури в VR». Домен Render не входить до довірених адрес VRChat. Free-тариф засинає, і перший запит після паузи часто виглядає як обрив. Тікети зберігаються в пам’яті процесу і зникають після перезапуску. Довга відповідь моделі не вміщається на VR-екран, тож її доводиться скорочувати. Quest залежить від того, чи витримає сцену сам світ MetaLab. Токен клієнта вшито в публічний префаб, тому він не є секретом: захищають сервер ліміт запитів і денний бюджет. Розбір цих обмежень як загроз валідності вимірювань: розділ 4 [документації](presentation-materials/documentation/DOCUMENTATION.md).
+Udon не відправляє тіло запиту, тому рев’ю не відбувається «прямо з клавіатури в VR». Домен Render не входить до довірених адрес VRChat. Free-тариф засинає, і перший запит після паузи часто виглядає як обрив. Тікети зберігаються в пам’яті процесу і зникають після перезапуску. Довга відповідь моделі не вміщається на VR-екран, тож її доводиться скорочувати. Quest залежить від того, чи витримає сцену сам світ MetaLab. Токен клієнта вшито в публічний префаб, тому він не є секретом: захищають сервер ліміт запитів і денний бюджет. Докладніше про обмеження: розділ 4 [документації](presentation-materials/documentation/DOCUMENTATION.md).
 
 ## 5. Подальший розвиток
 
@@ -80,7 +80,7 @@ Open [health](https://codesensei-d5zi.onrender.com/health) first so the free Ren
 
 ## 4. Difficulties and limits
 
-No POST from Udon. The Render host is not on VRChat’s trusted list. The free instance sleeps. Tickets live in memory and disappear on restart. Long answers do not fit the VR screen. Quest depends on the MetaLab scene. The client token is baked into the public prefab, so it is not a secret: the server rate limit and the daily budget are the actual protection. These limits are analysed as threats to validity in section 4 of the [documentation](presentation-materials/documentation/DOCUMENTATION.md).
+No POST from Udon. The Render host is not on VRChat’s trusted list. The free instance sleeps. Tickets live in memory and disappear on restart. Long answers do not fit the VR screen. Quest depends on the MetaLab scene. The client token is baked into the public prefab, so it is not a secret: the server rate limit and the daily budget are the actual protection. More on these limits is in section 4 of the [documentation](presentation-materials/documentation/DOCUMENTATION.md).
 
 ## 5. Further development
 

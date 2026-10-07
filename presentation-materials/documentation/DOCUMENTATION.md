@@ -4,12 +4,10 @@
 Erasmus+ NEXT Student Creative Project Competition · КПІ ім. Ігоря Сікорського  
 Тімлід: Маменко Марк · парна зала: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (команда Bilka)
 
-Версія документа: 2026-10-08 · ревізія коду: `548b4c2` · дата вимірювань: 2026-10-07 (UTC)
+Станом на 2026-10-07 · ревізія коду `548b4c2`
 
 Світ: https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info  
 API: https://codesensei-d5zi.onrender.com · вставка коду: [`/paste`](https://codesensei-d5zi.onrender.com/paste) · стан сервера: [`/health`](https://codesensei-d5zi.onrender.com/health)
-
-**Ключові слова:** VRChat, UdonSharp, велика мовна модель, навчання програмування, ООП, код-рев’ю.
 
 ## 1. Анотація
 
@@ -48,7 +46,7 @@ API: https://codesensei-d5zi.onrender.com · вставка коду: [`/paste`]
 
 ### 3.1 Архітектура
 
-Код-рев’ю проходить через п’ять учасників: студента, термінал, браузер, API і модель. Послідовність показано на рис. 1.
+Код-рев’ю проходить через п’ять учасників: студента, термінал, браузер, API і модель. Послідовність показано на схемі нижче.
 
 ```mermaid
 sequenceDiagram
@@ -74,11 +72,11 @@ sequenceDiagram
     T-->>S: рядки рецензії на спільному екрані
 ```
 
-*Рис. 1. Послідовність код-рев’ю. Кроки 1–2 відбуваються у VR; 3–6 — поза шоломом (браузер і сервер); 7–9 — обробка моделлю на сервері; 10–12 — опитування inbox і показ на спільному екрані.*
+*Послідовність код-рев’ю. Кроки 1–2 відбуваються у VR; 3–6 — поза шоломом (браузер і сервер); 7–9 — обробка моделлю на сервері; 10–12 — опитування inbox і показ на спільному екрані.*
 
-Обмеження платформи визначили ключові рішення. Їх зведено в таблиці 1.
+Обмеження платформи визначили ключові рішення. Їх зведено нижче.
 
-*Таблиця 1. Обмеження платформи та відповідні рішення*
+**Обмеження платформи та відповідні рішення**
 
 | Обмеження | Джерело | Рішення |
 | --- | --- | --- |
@@ -101,7 +99,7 @@ sequenceDiagram
 
 ### 3.3 Компоненти і параметри
 
-*Таблиця 2. Компоненти системи*
+**Компоненти системи**
 
 | Частина | Роль |
 | --- | --- |
@@ -115,7 +113,7 @@ sequenceDiagram
 | `InMemoryTicketStore` | Тікети в пам’яті процесу з TTL |
 | `DailyBudgetGuard` | Облік денного бюджету викликів моделі |
 
-*Таблиця 3. Параметри та ліміти*
+**Параметри та ліміти**
 
 | Параметр | Значення | Де задано |
 | --- | --- | --- |
@@ -132,7 +130,7 @@ sequenceDiagram
 
 ### 3.4 Середовище і версії
 
-*Таблиця 4. Версії та середовище вимірювань*
+**Версії та середовище вимірювань**
 
 | Компонент | Версія / значення |
 | --- | --- |
@@ -146,11 +144,11 @@ sequenceDiagram
 
 Назва `gemini-flash-latest` — псевдонім, який Google підміняє на новий реліз; про зміну версії за ним Google обіцяє попередження за два тижні [2]. Сервер не зберігає ні поле `modelVersion` відповіді, ні кількість токенів, тож точну версію моделі під час вимірювань зафіксувати неможливо. Для відтворюваності змінну `Gemini__Model` слід задавати конкретним кодом моделі (див. розділ 5).
 
-### 3.5 Оцінювання та результати
+### 3.5 Результати
 
-Оцінювання охоплює чотири питання: чи коректна логіка (тести), чи швидко відповідає сервер, скільки це коштує і наскільки якісні рев’ю. Протокол і скрипти повторного запуску — в [`docs/evaluation/`](../../docs/evaluation/README.md). Усі числа нижче отримано вимірюванням 2026-10-07 (UTC); те, що виміряти не вдалося, винесено в таблицю 8.
+Перевіряли чотири речі: чи працює логіка (тести), як швидко відповідає сервер, скільки коштує рев’ю і наскільки воно якісне. Протокол і скрипти повторного запуску — в [`docs/evaluation/`](../../docs/evaluation/README.md). Числа нижче виміряно 2026-10-07 (UTC); те, що виміряти не вдалося, зібрано в останній таблиці розділу.
 
-**Верифікація.** *Таблиця 5. Модульні тести та покриття (ревізія `548b4c2`)*
+**Верифікація.** Модульні тести та покриття (ревізія `548b4c2`):
 
 | Показник | Значення |
 | --- | --- |
@@ -163,15 +161,15 @@ sequenceDiagram
 
 Шар WebApi (ендпоінти, сторінка `/paste`) модульними тестами не охоплений і не входить у наведене покриття.
 
-**Затримка пресетів.** *Таблиця 6. Час відповіді `GET /api/preset/{id}` (n = 30, живий API, інстанс «прокинутий»)*
+**Затримка пресетів.** Час відповіді `GET /api/preset/{id}` (n = 30, живий API, інстанс «прокинутий»):
 
 | p50 | p95 | мін. | макс. | середнє |
 | --- | --- | --- | --- | --- |
 | 282 мс | 315 мс | 255 мс | 715 мс | 297 мс |
 
-Методика: 30 послідовних запитів `curl`, пресети 1–24 по колу, пауза 1,2 с; усі відповіді HTTP 200; точка вимірювання — Київ (вузол Cloudflare KBP). Перший запит `GET /health` повернувся за 342 мс. Сирі дані: [`preset-latency-2026-10-07.csv`](../../docs/evaluation/preset-latency-2026-10-07.csv). Серверний час (близько 0,3 с) на порядок менший за затримки клієнта: між запитами термінал чекає щонайменше 5,5 с, тож швидкість пресета у VR визначає платформа, а не сервер.
+Як мірялося: 30 послідовних запитів `curl`, пресети 1–24 по колу, пауза 1,2 с; усі відповіді HTTP 200; точка вимірювання — Київ (вузол Cloudflare KBP). Перший запит `GET /health` повернувся за 342 мс. Сирі дані: [`preset-latency-2026-10-07.csv`](../../docs/evaluation/preset-latency-2026-10-07.csv). Серверний час (близько 0,3 с) на порядок менший за затримки клієнта: між запитами термінал чекає щонайменше 5,5 с, тож швидкість пресета у VR визначає платформа, а не сервер.
 
-**Вартість (розрахункова).** Сервер не знає реальної кількості токенів, а оцінює витрати за формулою в `DailyBudgetGuard.EstimateUsd`: довжина фрагмента ÷ 4 токени на вході за $0,15 за мільйон і резерв 400 токенів на виході за $0,60 за мільйон (коефіцієнти задано в коді). *Таблиця 7. Розрахункова вартість рев’ю за формулою сервера*
+**Вартість (розрахункова).** Сервер не знає реальної кількості токенів, а оцінює витрати за формулою в `DailyBudgetGuard.EstimateUsd`: довжина фрагмента ÷ 4 токени на вході за $0,15 за мільйон і резерв 400 токенів на виході за $0,60 за мільйон (коефіцієнти задано в коді). Розрахункова вартість рев’ю за формулою сервера:
 
 | Фрагмент | Оцінка за запит | Запитів на добу при бюджеті $2 |
 | --- | --- | --- |
@@ -182,7 +180,7 @@ sequenceDiagram
 
 **Каталог пресетів.** Перевірено всі 24 теми: 4–6 рядків на тему (у середньому 4,1), 170–257 символів, найдовший рядок 81 символ. 19 із 24 пресетів містять рядки довші за 55 символів: перенесення на 55 символів сервер виконує лише для рев’ю, а пресети терміналу віддаються як є.
 
-*Таблиця 8. Вимірювання, яких не отримано, і причини*
+**Вимірювання, яких не отримано, і причини**
 
 | Вимір | Стан на 2026-10-07 | Причина / що потрібно |
 | --- | --- | --- |
@@ -200,15 +198,15 @@ sequenceDiagram
 
 Імпорт пакета в Unity: [`client/README.md`](../../client/README.md). HTTP-контракт: [`docs/api.md`](../../docs/api.md). Структура префаба: [`docs/prefab.md`](../../docs/prefab.md). Локальний запуск: скопіювати `.env.example` у `.env`, вписати `Gemini__ApiKey`, виконати `dotnet run --project src/WebApi`.
 
-## 4. Труднощі та ліміти (загрози валідності)
+## 4. Труднощі та ліміти
 
 **Платформа.** Зі світу неможливо надіслати текст, тому рев’ю є двокроковим і потребує пристрою поза шоломом. Домен Render не входить до довірених, тож кожен гравець вмикає «Allow Untrusted URLs» сам. Це обмеження платформи, а не тимчасовий обхід.
 
 **Інфраструктура.** Безкоштовний інстанс Render засинає, і перший запит після паузи схожий на обрив зв’язку. Тікети живуть у пам’яті процесу й зникають після перезапуску, а ключ моделі задається вручну в панелі Render: якщо змінну не задано або її втрачено, рев’ю перестає працювати. Саме так було під час вимірювання.
 
-**Внутрішня валідність вимірювань.** Затримку пресетів виміряно з однієї точки (Київ), на «прокинутому» інстансі, на вибірці 30 запитів; p95 за такого n є грубою оцінкою. Вартість розрахункова. Версію моделі не зафіксовано, бо `gemini-flash-latest` змінюється з часом.
+**Обмеження вимірювань.** Затримку пресетів виміряно з однієї точки (Київ), на «прокинутому» інстансі, на вибірці 30 запитів; p95 за такого n є грубою оцінкою. Вартість розрахункова. Версію моделі не зафіксовано, бо `gemini-flash-latest` змінюється з часом.
 
-**Зовнішня валідність.** Набір із 10 фрагментів демонстраційний і не репрезентує реальні роботи студентів. Оцінку влучання проводить одна людина, якщо не залучити другого оцінювача. Користувацького тестування зі студентами не було, тому твердження про зручність поки не підтверджене. Повний досвід розраховано на PC і PCVR; на Quest усе залежить від сцени MetaLab.
+**Охоплення.** Набір із 10 фрагментів демонстраційний і не репрезентує реальні роботи студентів. Оцінку влучання проводить одна людина, якщо не залучити другого оцінювача. Користувацького тестування зі студентами не було, тому твердження про зручність поки не підтверджене. Повний досвід розраховано на PC і PCVR; на Quest усе залежить від сцени MetaLab.
 
 **Безпека і дані.** Токен клієнта (`secret123`) міститься в публічному репозиторії та префабі, тому він ідентифікує клієнта, але не є секретом. Реальний захист становлять ліміт 60 запитів на хвилину з IP і денний бюджет моделі. Фрагменти коду студентів надсилаються до Google Gemini; сховище тікетів тримає їх лише в пам’яті процесу впродовж часу життя тікета (15 хв); журнали сервера на предмет вмісту фрагментів не перевірялися.
 
@@ -224,10 +222,10 @@ sequenceDiagram
 6. Перенесення пресетів через `TextFormatter`, щоб довжина рядка була однаковою для всіх відповідей.
 7. Окрема оптимізація під Quest після того, як зала MetaLab вкладеться в бюджет мобільної платформи; публічна картка світу, коли термінал остаточно стоїть на сцені.
 
-## Джерела
+## Посилання
 
-1. VRChat Creators. *String Loading*. https://creators.vrchat.com/worlds/udon/string-loading/ (дата звернення: 2026-10-07).
-2. Google AI for Developers. *Gemini models*. https://ai.google.dev/gemini-api/docs/models (дата звернення: 2026-10-07).
+1. VRChat Creators. *String Loading*. https://creators.vrchat.com/worlds/udon/string-loading/.
+2. Google AI for Developers. *Gemini models*. https://ai.google.dev/gemini-api/docs/models.
 
 ---
 
@@ -239,9 +237,7 @@ sequenceDiagram
 Erasmus+ NEXT Student Creative Project Competition · Igor Sikorsky Kyiv Polytechnic Institute  
 Team lead: **Mark Mamenko** · paired hall: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (team Bilka)
 
-Document version: 2026-10-08 · code revision: `548b4c2` · measurements taken: 2026-10-07 (UTC)
-
-**Keywords:** VRChat, UdonSharp, large language model, programming education, OOP, code review.
+As of 2026-10-07 · code revision `548b4c2`
 
 ## 1. Annotation
 
@@ -280,7 +276,7 @@ A team of five. Backend and proxy: Mark Mamenko. Preset texts and the mentor pro
 
 ### 3.1 Architecture
 
-A code review involves five participants: the student, the terminal, the browser, the API, and the model. Figure 1 shows the sequence.
+A code review involves five participants: the student, the terminal, the browser, the API, and the model. The sequence is shown below.
 
 ```mermaid
 sequenceDiagram
@@ -306,11 +302,11 @@ sequenceDiagram
     T-->>S: review lines on the shared screen
 ```
 
-*Figure 1. Code-review sequence. Steps 1–2 happen in VR; 3–6 outside the headset (browser and server); 7–9 are the model processing on the server; 10–12 are inbox polling and display on the shared screen.*
+*Code-review sequence. Steps 1–2 happen in VR; 3–6 outside the headset (browser and server); 7–9 are the model processing on the server; 10–12 are inbox polling and display on the shared screen.*
 
-Platform constraints drove the key decisions. Table 1 summarises them.
+Platform constraints drove the key decisions. They are summarised below.
 
-*Table 1. Platform constraints and the corresponding decisions*
+**Platform constraints and the corresponding decisions**
 
 | Constraint | Source | Decision |
 | --- | --- | --- |
@@ -333,7 +329,7 @@ A `CodeSensei_Terminal` prefab stands on a desk in the hall, with topic buttons,
 
 ### 3.3 Components and parameters
 
-*Table 2. System components*
+**System components**
 
 | Part | Role |
 | --- | --- |
@@ -347,7 +343,7 @@ A `CodeSensei_Terminal` prefab stands on a desk in the hall, with topic buttons,
 | `InMemoryTicketStore` | In-process tickets with a TTL |
 | `DailyBudgetGuard` | Accounting of the daily model budget |
 
-*Table 3. Parameters and limits*
+**Parameters and limits**
 
 | Parameter | Value | Set in |
 | --- | --- | --- |
@@ -364,7 +360,7 @@ All `/api/*` endpoints except `POST /api/code/submit` require a client token (`?
 
 ### 3.4 Environment and versions
 
-*Table 4. Versions and measurement environment*
+**Versions and measurement environment**
 
 | Component | Version / value |
 | --- | --- |
@@ -378,11 +374,11 @@ All `/api/*` endpoints except `POST /api/code/submit` require a client token (`?
 
 `gemini-flash-latest` is an alias that Google swaps for each new release; Google promises two weeks’ notice before the version behind it changes [2]. The server stores neither the `modelVersion` field of the response nor the token counts, so the exact model version during measurements cannot be recorded. For reproducibility, `Gemini__Model` should be set to a specific model code (see section 5).
 
-### 3.5 Evaluation and results
+### 3.5 Results
 
-The evaluation addresses four questions: is the logic correct (tests), how fast does the server respond, what does it cost, and how good are the reviews. The protocol and scripts for repeating it are in [`docs/evaluation/`](../../docs/evaluation/README.md). All numbers below were measured on 2026-10-07 (UTC); what could not be measured is listed in Table 8.
+We checked four things: whether the logic works (tests), how fast the server responds, what a review costs, and how good it is. The protocol and scripts for repeating it are in [`docs/evaluation/`](../../docs/evaluation/README.md). The numbers below were measured on 2026-10-07 (UTC); what could not be measured is collected in the last table of this section.
 
-**Verification.** *Table 5. Unit tests and coverage (revision `548b4c2`)*
+**Verification.** Unit tests and coverage (revision `548b4c2`):
 
 | Indicator | Value |
 | --- | --- |
@@ -395,15 +391,15 @@ The evaluation addresses four questions: is the logic correct (tests), how fast 
 
 The WebApi layer (endpoints and the `/paste` page) has no unit tests and is not part of the coverage above.
 
-**Preset latency.** *Table 6. Response time of `GET /api/preset/{id}` (n = 30, live API, instance awake)*
+**Preset latency.** Response time of `GET /api/preset/{id}` (n = 30, live API, instance awake):
 
 | p50 | p95 | min | max | mean |
 | --- | --- | --- | --- | --- |
 | 282 ms | 315 ms | 255 ms | 715 ms | 297 ms |
 
-Method: 30 sequential `curl` requests, presets 1–24 in rotation, 1.2 s pause; all responses were HTTP 200; the vantage point was Kyiv (Cloudflare node KBP). The first `GET /health` returned in 342 ms. Raw data: [`preset-latency-2026-10-07.csv`](../../docs/evaluation/preset-latency-2026-10-07.csv). The server time (about 0.3 s) is an order of magnitude below the client delays: the terminal waits at least 5.5 s between requests, so in VR the speed of a preset is set by the platform, not the server.
+How measured: 30 sequential `curl` requests, presets 1–24 in rotation, 1.2 s pause; all responses were HTTP 200; the vantage point was Kyiv (Cloudflare node KBP). The first `GET /health` returned in 342 ms. Raw data: [`preset-latency-2026-10-07.csv`](../../docs/evaluation/preset-latency-2026-10-07.csv). The server time (about 0.3 s) is an order of magnitude below the client delays: the terminal waits at least 5.5 s between requests, so in VR the speed of a preset is set by the platform, not the server.
 
-**Cost (estimated).** The server does not know the real token counts. It estimates spending with the formula in `DailyBudgetGuard.EstimateUsd`: snippet length ÷ 4 input tokens at $0.15 per million, plus a reserve of 400 output tokens at $0.60 per million (the coefficients are set in code). *Table 7. Estimated review cost by the server formula*
+**Cost (estimated).** The server does not know the real token counts. It estimates spending with the formula in `DailyBudgetGuard.EstimateUsd`: snippet length ÷ 4 input tokens at $0.15 per million, plus a reserve of 400 output tokens at $0.60 per million (the coefficients are set in code). Estimated review cost by the server formula:
 
 | Snippet | Estimate per request | Requests per day at a $2 budget |
 | --- | --- | --- |
@@ -414,7 +410,7 @@ This is an estimate, not a measurement: the formula counts only the snippet leng
 
 **Preset catalogue.** All 24 topics were checked: 4–6 lines per topic (4.1 on average), 170–257 characters, longest line 81 characters. 19 of the 24 presets contain lines longer than 55 characters: the server wraps at 55 characters only for reviews, and presets reach the terminal as they are.
 
-*Table 8. Measurements not obtained, and why*
+**Measurements not obtained, and why**
 
 | Measurement | Status on 2026-10-07 | Reason / what is needed |
 | --- | --- | --- |
@@ -432,15 +428,15 @@ This is an estimate, not a measurement: the formula counts only the snippet leng
 
 Importing the package into Unity: [`client/README.md`](../../client/README.md). HTTP contract: [`docs/api.md`](../../docs/api.md). Prefab structure: [`docs/prefab.md`](../../docs/prefab.md). Local run: copy `.env.example` to `.env`, set `Gemini__ApiKey`, and run `dotnet run --project src/WebApi`.
 
-## 4. Difficulties and limits (threats to validity)
+## 4. Difficulties and limits
 
 **Platform.** A world cannot send text out, so review takes two steps and needs a device outside the headset. The Render domain is not on the trusted list, so each player enables “Allow Untrusted URLs” themselves. This is a platform constraint, not a temporary workaround.
 
 **Infrastructure.** The free Render instance sleeps, and the first request after a pause looks like a dropped connection. Tickets live in process memory and vanish on restart, and the model key is entered manually in the Render dashboard: if the variable is missing or lost, review stops working. That was the situation during the measurement.
 
-**Internal validity of the measurements.** Preset latency was measured from one location (Kyiv), on an awake instance, with a sample of 30 requests; p95 at this n is a rough estimate. Cost is estimated. The model version is not recorded because `gemini-flash-latest` changes over time.
+**Measurement limits.** Preset latency was measured from one location (Kyiv), on an awake instance, with a sample of 30 requests; p95 at this n is a rough estimate. Cost is estimated. The model version is not recorded because `gemini-flash-latest` changes over time.
 
-**External validity.** The 10-snippet set is a demonstration and does not represent real student work. One person scores hit rate unless a second rater is added. There was no user testing with students, so the claim about usability is not yet supported. The full experience targets PC and PCVR; on Quest everything depends on the MetaLab scene.
+**Coverage.** The 10-snippet set is a demonstration and does not represent real student work. One person scores hit rate unless a second rater is added. There was no user testing with students, so the claim about usability is not yet supported. The full experience targets PC and PCVR; on Quest everything depends on the MetaLab scene.
 
 **Security and data.** The client token (`secret123`) is in the public repository and the prefab, so it identifies the client but is not a secret. The actual protection is the limit of 60 requests per minute per IP and the daily model budget. Students’ code snippets are sent to Google Gemini; the ticket store keeps them only in process memory for the ticket lifetime (15 min); the server logs were not checked for snippet contents.
 
@@ -456,7 +452,7 @@ Importing the package into Unity: [`client/README.md`](../../client/README.md). 
 6. Pass presets through `TextFormatter` so line length is the same for every answer.
 7. A separate Quest optimisation once the MetaLab hall fits the mobile budget; a public world listing once the terminal stays on the scene.
 
-## References
+## Links
 
 1. VRChat Creators. *String Loading*. https://creators.vrchat.com/worlds/udon/string-loading/ (accessed 2026-10-07).
 2. Google AI for Developers. *Gemini models*. https://ai.google.dev/gemini-api/docs/models (accessed 2026-10-07).
