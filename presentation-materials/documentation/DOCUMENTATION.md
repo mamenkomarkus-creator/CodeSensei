@@ -4,8 +4,6 @@
 Erasmus+ NEXT Student Creative Project Competition · КПІ ім. Ігоря Сікорського  
 Тімлід: Маменко Марк · парна зала: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT) (команда Bilka)
 
-Станом на 2026-10-07 · ревізія коду `548b4c2`
-
 Світ: https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info  
 API: https://codesensei-d5zi.onrender.com · вставка коду: [`/paste`](https://codesensei-d5zi.onrender.com/paste) · стан сервера: [`/health`](https://codesensei-d5zi.onrender.com/health)
 
