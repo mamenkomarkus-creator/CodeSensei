@@ -119,20 +119,21 @@ s11 = replaceEach(s11, "Learning design. OOP presets and mentor prompts.", [
   "World integration. MetaLab assembly, VRChat SDK, scene placement.",
 ]);
 s11 = replaceEach(s11, "Quality assurance. Tests, API contract, demo checklist.", [
-  "Authorship of created artefacts remains with the team.",
+  "Artefacts stay with the five authors. NEXT may use them for teaching.",
 ]);
-s11 = s11.replace(" Continued on the next slide.", " Five authors; artefacts remain the team’s IP.");
+s11 = s11.replace("CodeSensei authors", "Five authors");
+s11 = s11.replace(" Continued on the next slide.", " Five people. Artefacts stay with the team.");
 fs.writeFileSync(path.join(work, "ppt/slides/slide11.xml"), s11);
 
 let s3 = readSlide(3);
 s3 = s3.replace("[Name of the building / university location]", "Multimedia Laboratory (MetaLab), Igor Sikorsky KPI");
 s3 = s3.replace(
   "[Briefly describe the selected location and its role at the university — max. 2 sentences.]",
-  "Built in VRChat (SDK3, UdonSharp) inside our MetaLab hall — the digital twin of KPI MacPaw AI Lab — using .NET 10, Render and Google Gemini."
+  "Our MetaLab hall at Igor Sikorsky KPI, a VRChat twin of MacPaw AI Lab. CodeSensei is the mentor in this room: UdonSharp on the client, a .NET 10 proxy on Render, Google Gemini behind it."
 );
 s3 = s3.replace(
   "[List the areas included in your virtual model.]",
-  "Practical parts: 24 OOP preset buttons; code-review ticket + /paste; shared terminal display in our MetaLab hall."
+  "In this hall: 24 OOP topics, a five-character review ticket, the /paste page, and one shared screen for the group."
 );
 writeSlide(3, s3);
 
@@ -169,9 +170,9 @@ s6 = replaceEach(s6, "[Artefact name]", [
 ]);
 s6 = replaceEach(s6, "[Insert screenshot / image]", ["", "", ""]);
 s6 = replaceEach(s6, "[Briefly describe the artefact and its role in the virtual environment.]", [
-  "VRChat prefab: UdonSharp terminal, 5.5 s GET queue, synced answers.",
-  "24 OOP topics (encapsulation to OOP vs procedural) on preset buttons.",
-  "Student gets a 5-character code, pastes a snippet, Gemini replies on the VR screen.",
+  "UdonSharp prefab in MetaLab. The answer syncs, so the group reads the same lines.",
+  "Twenty-four short OOP explanations, from encapsulation to class versus object.",
+  "A five-character code, a C# snippet on /paste, then the Gemini review on the VR screen.",
 ]);
 s6 = insertPics(
   s6,
@@ -201,7 +202,7 @@ s7 = s7.replace(
 );
 s7 = s7.replace(
   "[Optional: mention 1–2 key challenges and how you addressed them.]",
-  "Limits: Udon cannot POST; Untrusted URLs required; Render Free sleeps; tickets live in memory; VR lines max 55 characters."
+  "Udon cannot POST, so review is a ticket plus /paste. VRChat blocks our host until Allow Untrusted URLs is on. Render Free sleeps. Tickets stay in memory. Lines wrap at 55 characters."
 );
 s7 = s7.replace(
   " You may use additional slides if needed to explain the technical implementation clearly.",
@@ -212,15 +213,15 @@ writeSlide(7, s7);
 let s8 = readSlide(8);
 s8 = s8.replace(
   "[How can students or teachers use this virtual location?]",
-  "In the NEXT-Study Metaverse lab a student presses an OOP preset or starts a live code review. A teacher sees the same synced answer on the shared terminal."
+  "In the MetaLab hall a student opens an OOP preset or starts a review. The teacher and the group see the same synced text."
 );
 s8 = s8.replace(
   "[What can visitors explore, learn or do in this environment?]",
-  "Explore 24 OOP explanations, generate a review ticket, paste a snippet on the web form, and read a mentor reply formatted for the VR screen (max 55 characters per line)."
+  "Visitors read 24 short explanations, take a review ticket, paste a snippet, and read a mentor reply fitted to the VR screen."
 );
 s8 = s8.replace(
   "[How could the model be extended or enriched in the future?]",
-  "Persistent ticket store, more languages, keep-alive hosting, extra OOP topics, public world listing after MetaLab import."
+  "Next: a ticket store that survives restarts, more languages, a host that stays awake, extra topics, and a public listing once the prefab stays in MetaLab."
 );
 writeSlide(8, s8);
 
