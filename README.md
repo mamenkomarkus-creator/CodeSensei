@@ -6,7 +6,7 @@ AI-ментор з об’єктно-орієнтованого програму
 
 Парний проєкт простору: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT). CodeSensei не будує кімнату. Він стоїть у вже зібраній лабораторії і відповідає на питання з ООП та на фрагменти коду.
 
-[Демо /paste](https://codesensei-d5zi.onrender.com/paste) · [Health](https://codesensei-d5zi.onrender.com/health) · [Світ MetaLab](https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info) · [Відео](presentation-materials/demo-video.mp4) · [Презентація](presentation-materials/CodeSensei-NEXT-presentation.pptx) · [Документація](presentation-materials/documentation/DOCUMENTATION.md)
+[Демо /paste](https://codesensei-d5zi.onrender.com/paste) · [Health](https://codesensei-d5zi.onrender.com/health) · [Світ MetaLab](https://vrchat.com/home/world/wrld_b1c73436-f022-4f98-9172-671f9f0da989/info) · [Відео](presentation-materials/demo-video.mp4) · [Презентація](presentation-materials/CodeSensei-NEXT-presentation.pptx) · [Документація](presentation-materials/documentation/DOCUMENTATION.md) · [Google Диск](https://drive.google.com/drive/folders/1uw6UPaKP2u9v4NyBnryPq3I7B9trUXIB?usp=sharing)
 
 <p align="center">
   <img src="presentation-materials/lab/01-overview.jpg" alt="MetaLab — наша лабораторія" width="880">
