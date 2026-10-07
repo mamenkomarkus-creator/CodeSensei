@@ -1,18 +1,13 @@
 # Presentation materials
 
-Презентація, документація та демо-відео проєкту **CodeSensei** для конкурсу Erasmus+ NEXT.
+Матеріали конкурсу NEXT для **CodeSensei**. Фото — лише наша лабораторія MetaLab.
 
-The same demo video is also in the paired repo [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT).
-
-## Contents / Вміст
-
-| File | Description |
+| | |
 | --- | --- |
-| [demo-video.mp4](demo-video.mp4) | Спільне демо MetaLab + CodeSensei / shared demo |
-| [CodeSensei-NEXT-presentation.pptx](CodeSensei-NEXT-presentation.pptx) | Слайди офіційного шаблону NEXT |
-| [CodeSensei-NEXT.pdf](CodeSensei-NEXT.pdf) | PDF презентації |
-| [documentation/next-integration.md](documentation/next-integration.md) | Інтеграція в VRChat / MetaLab |
-| `lab/` | Кадри лабораторії |
-| `*.png` | Скріншоти термінала, пресетів, QR |
+| [Документація](documentation/DOCUMENTATION.md) | анотація, вступ, практика, ліміти, розвиток |
+| [Презентація](CodeSensei-NEXT-presentation.pptx) | слайди NEXT |
+| [demo-video.mp4](demo-video.mp4) | спільне відео з MetaLab |
+| `lab/` | кадри нашої зали |
+| `qrGithub.png`, `qrPaste.png` | QR |
 
-Технічний HTTP-контракт лишається в репозиторії: [`../docs/api.md`](../docs/api.md).
+Те саме відео: [MetaLab](https://github.com/mamenkomarkus-creator/MetaLab-NEXT). HTTP API: [`../docs/api.md`](../docs/api.md).

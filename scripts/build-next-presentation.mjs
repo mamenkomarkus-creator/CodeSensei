@@ -5,7 +5,6 @@ import { execFileSync } from "node:child_process";
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const srcPptx = "/tmp/next-template/pptx";
 const work = "/tmp/next-template/filled";
-const assets = "/Users/markmamenko/.cursor/projects/Users-markmamenko-Projects-CodeSensei/assets";
 const outDir = path.join(root, "presentation-materials");
 const outPptx = path.join(outDir, "CodeSensei-NEXT-presentation.pptx");
 
@@ -14,19 +13,29 @@ execFileSync("cp", ["-R", srcPptx, work]);
 fs.mkdirSync(path.join(work, "ppt/media"), { recursive: true });
 fs.mkdirSync(outDir, { recursive: true });
 
-const files = {
-  metalab: path.join(assets, "metalab-interior.png"),
-  campus: path.join(assets, "kpi-campus.png"),
-  vr: path.join(assets, "vr-terminal.png"),
-  terminal: path.join(assets, "artefact-terminal.png"),
-  presets: path.join(assets, "artefact-presets.png"),
-  paste: path.join(assets, "artefact-paste.png"),
+const labDir = path.join(root, "presentation-materials/lab");
+const mediaDir = path.join(work, "ppt/media");
+
+function labToPng(srcJpg, destName) {
+  execFileSync("sips", ["-s", "format", "png", srcJpg, "--out", path.join(mediaDir, destName)], {
+    stdio: "ignore",
+  });
+}
+
+labToPng(path.join(labDir, "01-overview.jpg"), "metalab.png");
+labToPng(path.join(labDir, "02-lounge.jpg"), "campus.png");
+labToPng(path.join(labDir, "01-overview.jpg"), "vr.png");
+labToPng(path.join(labDir, "04-seminar.jpg"), "terminal.png");
+labToPng(path.join(labDir, "02-lounge.jpg"), "presets.png");
+labToPng(path.join(labDir, "03-adjacent-bay.jpg"), "paste.png");
+
+const qrFiles = {
   qrGithub: "/tmp/next-template/qr-github.png",
   qrPaste: "/tmp/next-template/qr-paste.png",
 };
-
-for (const [name, src] of Object.entries(files)) {
-  fs.copyFileSync(src, path.join(work, `ppt/media/${name}.png`));
+for (const [name, src] of Object.entries(qrFiles)) {
+  if (!fs.existsSync(src)) continue;
+  fs.copyFileSync(src, path.join(mediaDir, `${name}.png`));
   fs.copyFileSync(src, path.join(outDir, `${name}.png`));
 }
 
@@ -119,17 +128,17 @@ let s3 = readSlide(3);
 s3 = s3.replace("[Name of the building / university location]", "Multimedia Laboratory (MetaLab), Igor Sikorsky KPI");
 s3 = s3.replace(
   "[Briefly describe the selected location and its role at the university — max. 2 sentences.]",
-  "MetaLab is the university multimedia space established under Erasmus+ NEXT. It is the physical counterpart of the virtual classroom where students practise digital and programming skills."
+  "Built in VRChat (SDK3, UdonSharp) inside our MetaLab hall — the digital twin of KPI MacPaw AI Lab — using .NET 10, Render and Google Gemini."
 );
 s3 = s3.replace(
   "[List the areas included in your virtual model.]",
-  "Student workstation with the CodeSensei terminal; 24 OOP preset buttons; code-review station (5-character ticket + /paste); shared display for collaborative learning."
+  "Practical parts: 24 OOP preset buttons; code-review ticket + /paste; shared terminal display in our MetaLab hall."
 );
 writeSlide(3, s3);
 
 let s4 = readSlide(4);
-s4 = s4.replace("[Insert a main photo of the location]", "MetaLab workstation — reference interior");
-s4 = s4.replace("[OPTIONAL: Add 1–3 additional reference photos]", "Campus context, Igor Sikorsky KPI");
+s4 = s4.replace("[Insert a main photo of the location]", "MetaLab overview — our laboratory");
+s4 = s4.replace("[OPTIONAL: Add 1–3 additional reference photos]", "MetaLab lounge — virtual classroom");
 s4 = insertPics(
   s4,
   pic({ id: 401, name: "MetaLab", rId: "rId10", x: 322800, y: 1459375, cx: 7000000, cy: 4300000 }) +
@@ -142,9 +151,9 @@ addImageRels(4, [
 ]);
 
 let s5 = readSlide(5);
-s5 = s5.replace("[Insert a main screenshot of your virtual model]", "CodeSensei terminal in the virtual laboratory");
-s5 = s5.replace("[OPTIONAL: Add 1–3 additional screenshots if needed]", "VRChat-compatible GET-only workstation");
-s5 = s5.replace("[Add 1–3 additional screenshots if needed]", "UdonSharp terminal with 55-character lines");
+s5 = s5.replace("[Insert a main screenshot of your virtual model]", "MetaLab virtual laboratory");
+s5 = s5.replace("[OPTIONAL: Add 1–3 additional screenshots if needed]", "Seminar and lounge areas of MetaLab");
+s5 = s5.replace("[Add 1–3 additional screenshots if needed]", "Workstations in the MetaLab world");
 s5 = insertPics(
   s5,
   pic({ id: 501, name: "VR model", rId: "rId10", x: 322800, y: 1459375, cx: 11546400, cy: 4300000 })
@@ -192,7 +201,7 @@ s7 = s7.replace(
 );
 s7 = s7.replace(
   "[Optional: mention 1–2 key challenges and how you addressed them.]",
-  "Udon cannot POST, so review is ticket + /paste + inbox. Render Free sleeps — /health wakes the instance. Pending tickets are hidden so the client does not stop polling early."
+  "Limits: Udon cannot POST; Untrusted URLs required; Render Free sleeps; tickets live in memory; VR lines max 55 characters."
 );
 s7 = s7.replace(
   " You may use additional slides if needed to explain the technical implementation clearly.",
@@ -211,7 +220,7 @@ s8 = s8.replace(
 );
 s8 = s8.replace(
   "[How could the model be extended or enriched in the future?]",
-  "Persistent ticket store, more languages, keep-alive Action, additional lab furniture, and a public VRChat world listing after MetaLab import."
+  "Persistent ticket store, more languages, keep-alive hosting, extra OOP topics, public world listing after MetaLab import."
 );
 writeSlide(8, s8);
 
@@ -226,7 +235,7 @@ s9 = s9.replace(
 );
 s9 = s9.replace(
   "[Add any other relevant links or documentation.]",
-  "VRChat: https://hello.vrchat.com/   NEXT: https://nextstudy.eu/   Integration notes: presentation-materials/documentation/next-integration.md"
+  "VRChat: https://hello.vrchat.com/   NEXT: https://nextstudy.eu/   Docs: presentation-materials/documentation/DOCUMENTATION.md"
 );
 s9 = s9.replace(
   " Make sure all links and QR codes are accessible and working.",
