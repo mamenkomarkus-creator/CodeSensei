@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "Якщо ви використовуєте цю роботу, цитуйте її так / If you use this work, please cite it as below."
+title: "CodeSensei: AI-ментор з об'єктно-орієнтованого програмування у віртуальній лабораторії VRChat"
+type: software
+abstract: >-
+  AI-ментор з ООП для віртуальної зали MetaLab у VRChat: сервер-проксі на .NET 10
+  з моделлю Google Gemini і GET-only клієнт UdonSharp. Проєкт команди KP_Devs
+  для конкурсу Erasmus+ NEXT (КПІ ім. Ігоря Сікорського).
+authors:
+  - family-names: Mamenko
+    given-names: Mark
+    affiliation: "Igor Sikorsky Kyiv Polytechnic Institute"
+  - family-names: Shozda
+    given-names: Kateryna
+    affiliation: "Igor Sikorsky Kyiv Polytechnic Institute"
+  - family-names: Ilienko
+    given-names: Denys
+    affiliation: "Igor Sikorsky Kyiv Polytechnic Institute"
+  - family-names: Pavlenko
+    given-names: Sviatoslav
+    affiliation: "Igor Sikorsky Kyiv Polytechnic Institute"
+  - family-names: Poshytyniuk
+    given-names: Dmytro
+    affiliation: "Igor Sikorsky Kyiv Polytechnic Institute"
+repository-code: "https://github.com/mamenkomarkus-creator/CodeSensei"
+url: "https://github.com/mamenkomarkus-creator/CodeSensei"
+keywords:
+  - VRChat
+  - UdonSharp
+  - large language models
+  - programming education
+  - object-oriented programming
+date-released: 2026-10-08

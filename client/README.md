@@ -1,6 +1,6 @@
-# Клієнт VRChat (учасник B / збірка E)
+# Клієнт VRChat
 
-Готовий термінал CodeSensei для Unity + VRChat SDK3.
+Готовий термінал CodeSensei для Unity + VRChat SDK3 (UdonSharp). Опис скриптів і параметрів: [`docs/prefab.md`](../docs/prefab.md).
 
 ## Що імпортувати
 

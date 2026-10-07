@@ -42,11 +42,13 @@ AI-ментор з об’єктно-орієнтованого програму
 
 Щоб демо не впало на першому кліку, спочатку відкрийте [health](https://codesensei-d5zi.onrender.com/health) і зачекайте пів хвилини: безкоштовний інстанс Render засинає. У VRChat увімкніть **Settings → Security → Allow Untrusted URLs** і зайдіть у світ знову. Якщо на екрані `Not trusted url`, це саме цей тумблер, а не зламаний сервер.
 
+**Перевірка.** 36 модульних тестів NUnit проходять, покриття рядків 90,5 %. Відповідь пресета на живому API: p50 = 282 мс, p95 = 315 мс (n = 30). Затримку й якість код-рев’ю поки не виміряно: на момент заміру на сервері не був заданий ключ Gemini. Методика, версії й обмеження описані в [документації](presentation-materials/documentation/DOCUMENTATION.md) (розділ 3.5), скрипти й протокол повтору — у [`docs/evaluation/`](docs/evaluation/README.md).
+
 Імпорт префаба в Unity: [`client/README.md`](client/README.md). Контракт запитів: [`docs/api.md`](docs/api.md). Локально: скопіюйте `.env.example` у `.env`, впишіть `Gemini__ApiKey` і виконайте `dotnet run --project src/WebApi`.
 
 ## 4. Труднощі та ліміти
 
-Udon не відправляє тіло запиту, тому рев’ю не відбувається «прямо з клавіатури в VR». Домен Render не входить до довірених адрес VRChat. Free-тариф засинає, і перший запит після паузи часто виглядає як обрив. Тікети зберігаються в пам’яті процесу і зникають після перезапуску. Довга відповідь моделі не вміщається на VR-екран, тож її доводиться скорочувати. Quest залежить від того, чи витримає сцену сам світ MetaLab.
+Udon не відправляє тіло запиту, тому рев’ю не відбувається «прямо з клавіатури в VR». Домен Render не входить до довірених адрес VRChat. Free-тариф засинає, і перший запит після паузи часто виглядає як обрив. Тікети зберігаються в пам’яті процесу і зникають після перезапуску. Довга відповідь моделі не вміщається на VR-екран, тож її доводиться скорочувати. Quest залежить від того, чи витримає сцену сам світ MetaLab. Токен клієнта вшито в публічний префаб, тому він не є секретом: захищають сервер ліміт запитів і денний бюджет. Розбір цих обмежень як загроз валідності вимірювань: розділ 4 [документації](presentation-materials/documentation/DOCUMENTATION.md).
 
 ## 5. Подальший розвиток
 
@@ -72,11 +74,13 @@ The client is **VRChat SDK3** and **UdonSharp**. The server is **C# / .NET 10**,
 
 The terminal has 24 topics (encapsulation, inheritance, polymorphism, abstraction, class versus object, and the rest), Code review, and Cancel. Presets use `GET /api/preset/{1-24}`. For a review the terminal shows a code such as `7K3MP`, the student submits C# on `/paste`, and the screen polls the inbox. Markdown is stripped and lines wrap at 55 characters.
 
+**Verification.** All 36 NUnit tests pass with 90.5 % line coverage. Preset response on the live API: p50 = 282 ms, p95 = 315 ms (n = 30). Review latency and quality are not measured yet: the Gemini key was not configured on the server at measurement time. Method, versions, and limits are in the [documentation](presentation-materials/documentation/DOCUMENTATION.md) (section 3.5); scripts and the protocol for repeating the run are in [`docs/evaluation/`](docs/evaluation/README.md).
+
 Open [health](https://codesensei-d5zi.onrender.com/health) first so the free Render instance can wake. In VRChat enable **Allow Untrusted URLs** and rejoin. `Not trusted url` means that toggle is still off. Prefab: [`client/README.md`](client/README.md). HTTP: [`docs/api.md`](docs/api.md). Locally, copy `.env.example` to `.env`, set `Gemini__ApiKey`, and run `dotnet run --project src/WebApi`.
 
 ## 4. Difficulties and limits
 
-No POST from Udon. The Render host is not on VRChat’s trusted list. The free instance sleeps. Tickets live in memory and disappear on restart. Long answers do not fit the VR screen. Quest depends on the MetaLab scene.
+No POST from Udon. The Render host is not on VRChat’s trusted list. The free instance sleeps. Tickets live in memory and disappear on restart. Long answers do not fit the VR screen. Quest depends on the MetaLab scene. The client token is baked into the public prefab, so it is not a secret: the server rate limit and the daily budget are the actual protection. These limits are analysed as threats to validity in section 4 of the [documentation](presentation-materials/documentation/DOCUMENTATION.md).
 
 ## 5. Further development
 

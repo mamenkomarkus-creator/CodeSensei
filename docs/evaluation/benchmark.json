@@ -1,0 +1,22 @@
+[
+  {"id": "S01", "category": "syntax", "defect": "Пропущено крапку з комою після `_value++`.",
+   "code": "public class Counter\n{\n    private int _value;\n\n    public void Increment()\n    {\n        _value++\n    }\n}"},
+  {"id": "S02", "category": "encapsulation", "defect": "Публічне поле Balance без валідації: порушення інкапсуляції, можливий від'ємний баланс.",
+   "code": "public class BankAccount\n{\n    public decimal Balance;\n\n    public void Withdraw(decimal amount)\n    {\n        Balance -= amount;\n    }\n}"},
+  {"id": "S03", "category": "inheritance", "defect": "Метод базового класу Speak не virtual, тому `override` у Dog не компілюється (CS0506).",
+   "code": "public class Animal\n{\n    public string Speak() { return \"...\"; }\n}\n\npublic class Dog : Animal\n{\n    public override string Speak() { return \"Woof\"; }\n}"},
+  {"id": "S04", "category": "abstraction", "defect": "Спроба створити екземпляр абстрактного класу Shape (CS0144).",
+   "code": "public abstract class Shape\n{\n    public abstract double Area();\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var s = new Shape();\n        System.Console.WriteLine(s.Area());\n    }\n}"},
+  {"id": "S05", "category": "interface", "defect": "Клас Employee оголошує IPayable, але не реалізує метод Pay (CS0535).",
+   "code": "public interface IPayable\n{\n    decimal Pay();\n}\n\npublic class Employee : IPayable\n{\n    public string Name { get; set; }\n}"},
+  {"id": "S06", "category": "logic", "defect": "Вихід за межі масиву: умова `i <= nums.Length` (off-by-one).",
+   "code": "int[] nums = { 1, 2, 3, 4 };\nint sum = 0;\nfor (int i = 0; i <= nums.Length; i++)\n{\n    sum += nums[i];\n}\nSystem.Console.WriteLine(sum);"},
+  {"id": "S07", "category": "logic", "defect": "Цілочисельне ділення sum / values.Length відкидає дробову частину (і ділення на нуль для порожнього масиву).",
+   "code": "public static double Average(int[] values)\n{\n    int sum = 0;\n    foreach (var v in values) sum += v;\n    return sum / values.Length;\n}"},
+  {"id": "S08", "category": "encapsulation", "defect": "Поле _tracks не ініціалізоване: NullReferenceException в Add.",
+   "code": "using System.Collections.Generic;\n\npublic class Playlist\n{\n    private List<string> _tracks;\n\n    public void Add(string title)\n    {\n        _tracks.Add(title);\n    }\n}"},
+  {"id": "S09", "category": "logic", "defect": "Зміна колекції під час foreach: InvalidOperationException.",
+   "code": "var items = new List<int> { 1, 2, 3, 4 };\nforeach (var x in items)\n{\n    if (x % 2 == 0) items.Remove(x);\n}"},
+  {"id": "S10", "category": "control", "defect": "Помилок немає (контрольний коректний фрагмент: поліморфізм через абстрактний клас).",
+   "code": "public abstract class Shape\n{\n    public abstract double Area();\n}\n\npublic class Circle : Shape\n{\n    private readonly double _radius;\n\n    public Circle(double radius) { _radius = radius; }\n\n    public override double Area() => System.Math.PI * _radius * _radius;\n}"}
+]
